@@ -4,17 +4,17 @@ import (
 	"github.com/jihanlugas/rental/model"
 )
 
-type User model.UsersView
-type Users []model.UsersView
+type User model.UserView
+type Users []model.UserView
 
-type Property model.PropertiesView
-type Properties []model.PropertiesView
+type Company model.CompanyView
+type Companies []model.CompanyView
 
-type Propertysetting model.PropertysettingsView
-type Propertysettings []model.PropertysettingsView
+type Companysetting model.CompanysettingView
+type Companysettings []model.CompanysettingView
 
 type LoginUser struct {
-	User            User            `json:"user"`
-	Property        Property        `json:"property"`
-	Propertysetting Propertysetting `json:"propertysetting"`
+	User           User           `json:"user"`
+	Company        Company        `json:"company"`
+	Companysetting Companysetting `json:"companysetting"`
 }

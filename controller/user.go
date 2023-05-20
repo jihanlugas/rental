@@ -24,7 +24,7 @@ func UserComposer() User {
 func (h User) SignIn(c echo.Context) error {
 	var err error
 	var user model.User
-	var userproperty model.Userproperties
+	var usercompany model.Usercompany
 
 	req := new(request.Signin)
 	if err = c.Bind(req); err != nil {
@@ -67,7 +67,7 @@ func (h User) SignIn(c echo.Context) error {
 		return response.Error(http.StatusBadRequest, "invalid username or password", response.Payload{}).SendJSON(c)
 	}
 
-	err = conn.Where("user_id = ? ", user.ID).Where("default_property = ? ", true).First(&userproperty).Error
+	err = conn.Where("user_id = ? ", user.ID).Where("default_company = ? ", true).First(&usercompany).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return response.Error(http.StatusBadRequest, "data not found", response.Payload{}).SendJSON(c)
@@ -88,7 +88,7 @@ func (h User) SignIn(c echo.Context) error {
 	}
 
 	expiredAt := time.Now().Add(time.Hour * time.Duration(config.AuthTokenExpiredHour))
-	token, err := getLoginToken(user.ID, user.RoleID, userproperty.PropertyID, user.PassVersion, expiredAt)
+	token, err := getLoginToken(user.ID, user.RoleID, usercompany.CompanyID, user.PassVersion, expiredAt)
 	if err != nil {
 		return response.Error(http.StatusBadRequest, "generate token failed", response.Payload{}).SendJSON(c)
 	}
@@ -104,9 +104,9 @@ func (h User) SignOut(c echo.Context) error {
 
 func (h User) Init(c echo.Context) error {
 	var err error
-	var userview model.UsersView
-	var propertyview model.PropertiesView
-	var propertysettingview model.PropertysettingsView
+	var userview model.UserView
+	var companyview model.CompanyView
+	var companysettingview model.CompanysettingView
 
 	loginUser, err := getUserLoginInfo(c)
 	if err != nil {
@@ -124,7 +124,7 @@ func (h User) Init(c echo.Context) error {
 		errorInternal(c, err)
 	}
 
-	err = conn.Where("id = ? ", loginUser.PropertyID).First(&propertyview).Error
+	err = conn.Where("id = ? ", loginUser.CompanyID).First(&companyview).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return response.Error(http.StatusBadRequest, "record not found", response.Payload{}).SendJSON(c)
@@ -132,7 +132,7 @@ func (h User) Init(c echo.Context) error {
 		errorInternal(c, err)
 	}
 
-	err = conn.Where("id = ? ", loginUser.PropertyID).First(&propertysettingview).Error
+	err = conn.Where("id = ? ", loginUser.CompanyID).First(&companysettingview).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return response.Error(http.StatusBadRequest, "record not found", response.Payload{}).SendJSON(c)
@@ -141,9 +141,9 @@ func (h User) Init(c echo.Context) error {
 	}
 
 	res := response.LoginUser{
-		User:            response.User(userview),
-		Property:        response.Property(propertyview),
-		Propertysetting: response.Propertysetting(propertysettingview),
+		User:           response.User(userview),
+		Company:        response.Company(companyview),
+		Companysetting: response.Companysetting(companysettingview),
 	}
 
 	return response.Success(http.StatusOK, "success", res).SendJSON(c)
@@ -158,7 +158,7 @@ func (h User) RefreshToken(c echo.Context) error {
 	}
 
 	expiredAt := time.Now().Add(time.Hour * time.Duration(config.AuthTokenExpiredHour))
-	token, err := getLoginToken(loginUser.UserID, loginUser.RoleID, loginUser.PropertyID, loginUser.PassVersion, expiredAt)
+	token, err := getLoginToken(loginUser.UserID, loginUser.RoleID, loginUser.CompanyID, loginUser.PassVersion, expiredAt)
 	if err != nil {
 		return response.ErrorForce(http.StatusBadRequest, "generate token failed", response.Payload{}).SendJSON(c)
 	}

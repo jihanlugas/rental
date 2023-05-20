@@ -76,19 +76,23 @@ func up() {
 	if err != nil {
 		panic(err)
 	}
+	err = conn.Migrator().AutoMigrate(&model.Company{})
+	if err != nil {
+		panic(err)
+	}
+	err = conn.Migrator().AutoMigrate(&model.Companysetting{})
+	if err != nil {
+		panic(err)
+	}
+	err = conn.Migrator().AutoMigrate(&model.Usercompany{})
+	if err != nil {
+		panic(err)
+	}
 	err = conn.Migrator().AutoMigrate(&model.Property{})
 	if err != nil {
 		panic(err)
 	}
-	err = conn.Migrator().AutoMigrate(&model.Propertysetting{})
-	if err != nil {
-		panic(err)
-	}
 	err = conn.Migrator().AutoMigrate(&model.Calendar{})
-	if err != nil {
-		panic(err)
-	}
-	err = conn.Migrator().AutoMigrate(&model.Userproperties{})
 	if err != nil {
 		panic(err)
 	}
@@ -97,22 +101,66 @@ func up() {
 	vUser := conn.Model(&model.User{}).
 		Where("delete_dt is null")
 
+	vCompany := conn.Model(&model.Company{}).
+		Joins("join users on users.id = companies.user_id ").
+		Where("companies.delete_dt is null")
+
+	vCompanysetting := conn.Model(&model.Companysetting{}).
+		Joins("join companies on companies.id = companysettings.id ").
+		Where("companies.delete_dt is null")
+
+	vUsercompany := conn.Model(&model.Usercompany{}).
+		Joins("join users on users.id = usercompanies.user_id").
+		Joins("join companies on companies.id = usercompanies.company_id ").
+		Where("usercompanies.delete_dt is null")
+
 	vProperty := conn.Model(&model.Property{}).
-		Joins("join users on users.id = properties.user_id ").
-		Where("properties.delete_dt is null")
+		Joins("join companies on companies.id = properties.company_id ").
+		Where("companies.delete_dt is null")
 
-	vPropertysetting := conn.Model(&model.Propertysetting{}).
-		Joins("join properties on properties.id = propertysettings.id ").
-		Where("properties.delete_dt is null")
-
-	vUserproperty := conn.Model(&model.Userproperties{}).
-		Joins("join users on users.id = userproperties.user_id").
-		Joins("join properties on properties.id = userproperties.property_id ").
-		Where("userproperties.delete_dt is null")
+	vCalendar := conn.Model(&model.Calendar{}).
+		Select(
+			"calendars.id",
+			"calendars.company_id",
+			"calendars.property_id",
+			"calendars.name",
+			"calendars.start_dt",
+			"calendars.end_dt",
+			"calendars.status",
+			"calendars.create_by",
+			"calendars.create_dt",
+			"calendars.update_by",
+			"calendars.update_dt",
+		).
+		Where("delete_dt is null")
 
 	err = conn.Migrator().CreateView("users_view", gorm.ViewOption{
 		Replace: true,
 		Query:   vUser,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = conn.Migrator().CreateView("companies_view", gorm.ViewOption{
+		Replace: true,
+		Query:   vCompany,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = conn.Migrator().CreateView("companysettings_view", gorm.ViewOption{
+		Replace: true,
+		Query:   vCompanysetting,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = conn.Migrator().CreateView("usercompanies_view", gorm.ViewOption{
+		Replace: true,
+		Query:   vUsercompany,
 	})
 	if err != nil {
 		panic(err)
@@ -126,17 +174,9 @@ func up() {
 		panic(err)
 	}
 
-	err = conn.Migrator().CreateView("propertysettings_view", gorm.ViewOption{
+	err = conn.Migrator().CreateView("calendars_view", gorm.ViewOption{
 		Replace: true,
-		Query:   vPropertysetting,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	err = conn.Migrator().CreateView("userproperties_view", gorm.ViewOption{
-		Replace: true,
-		Query:   vUserproperty,
+		Query:   vCalendar,
 	})
 	if err != nil {
 		panic(err)
@@ -153,15 +193,23 @@ func down() {
 	if err != nil {
 		panic(err)
 	}
+	err = conn.Migrator().DropView("companies_view")
+	if err != nil {
+		panic(err)
+	}
+	err = conn.Migrator().DropView("companysettings_view")
+	if err != nil {
+		panic(err)
+	}
+	err = conn.Migrator().DropView("usercompanies_view")
+	if err != nil {
+		panic(err)
+	}
 	err = conn.Migrator().DropView("properties_view")
 	if err != nil {
 		panic(err)
 	}
-	err = conn.Migrator().DropView("propertysettings_view")
-	if err != nil {
-		panic(err)
-	}
-	err = conn.Migrator().DropView("userproperties_view")
+	err = conn.Migrator().DropView("calendars_view")
 	if err != nil {
 		panic(err)
 	}
@@ -171,15 +219,19 @@ func down() {
 	if err != nil {
 		panic(err)
 	}
+	err = conn.Migrator().DropTable(&model.Company{})
+	if err != nil {
+		panic(err)
+	}
+	err = conn.Migrator().DropTable(&model.Companysetting{})
+	if err != nil {
+		panic(err)
+	}
+	err = conn.Migrator().DropTable(&model.Usercompany{})
+	if err != nil {
+		panic(err)
+	}
 	err = conn.Migrator().DropTable(&model.Property{})
-	if err != nil {
-		panic(err)
-	}
-	err = conn.Migrator().DropTable(&model.Propertysetting{})
-	if err != nil {
-		panic(err)
-	}
-	err = conn.Migrator().DropTable(&model.Userproperties{})
 	if err != nil {
 		panic(err)
 	}
@@ -200,29 +252,39 @@ func seed() {
 		{ID: utils.GetUniqueID(), RoleID: utils.GetUniqueID(), Email: "jihanlugas2@gmail.com", Username: "jihanlugas", NoHp: "6287770333043", Fullname: "Jihan Lugas", Passwd: password, PassVersion: 1, Active: true, LastLoginDt: nil, PhotoID: "", CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
 	}
 
+	companies := []model.Company{
+		{ID: utils.GetUniqueID(), UserID: users[0].ID, Name: "Company 1", CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+	}
+
+	companysettings := []model.Companysetting{
+		{ID: companies[0].ID, DefaultTimeStart: 12, DefaultTimeEnd: 12},
+	}
+
 	properties := []model.Property{
-		{ID: utils.GetUniqueID(), UserID: users[0].ID, Name: "Property 1", CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, Name: "Lapangan 1", Description: "Description"},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, Name: "Lapangan 2", Description: "Description"},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, Name: "Lapangan 3", Description: "Description"},
 	}
 
-	propertysettings := []model.Propertysetting{
-		{ID: properties[0].ID, DefaultTimeStart: 12, DefaultTimeEnd: 12},
+	calendars := []model.Calendar{
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: "Tes", StartDt: now.Add(-5 * time.Hour), EndDt: now.Add(-4 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: "Tes", StartDt: now.Add(-4 * time.Hour), EndDt: now.Add(-3 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: "Tes", StartDt: now.Add(-3 * time.Hour), EndDt: now.Add(-2 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: "Tes", StartDt: now.Add(-2 * time.Hour), EndDt: now.Add(-1 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: "Tes", StartDt: now.Add(-1 * time.Hour), EndDt: now.Add(0 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: "Tes", StartDt: now.Add(0 * time.Hour), EndDt: now.Add(1 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: "Tes", StartDt: now.Add(1 * time.Hour), EndDt: now.Add(2 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: "Tes", StartDt: now.Add(2 * time.Hour), EndDt: now.Add(3 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: "Tes", StartDt: now.Add(3 * time.Hour), EndDt: now.Add(4 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: "Tes", StartDt: now.Add(4 * time.Hour), EndDt: now.Add(5 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: "Tes", StartDt: now.Add(6 * time.Hour), EndDt: now.Add(8 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: "Tes", StartDt: now.Add(8 * time.Hour), EndDt: now.Add(10 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: "Tes", StartDt: now.Add(10 * time.Hour), EndDt: now.Add(12 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: "Tes", StartDt: now.Add(12 * time.Hour), EndDt: now.Add(14 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
 	}
 
-	events := []model.Calendar{
-		{ID: utils.GetUniqueID(), PropertyID: properties[0].ID, GroupID: "1", Name: "Tes", StartDt: now.Add(-5 * time.Hour), EndDt: now.Add(-4 * time.Hour), CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), PropertyID: properties[0].ID, GroupID: "2", Name: "Tes", StartDt: now.Add(-4 * time.Hour), EndDt: now.Add(-3 * time.Hour), CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), PropertyID: properties[0].ID, GroupID: "1", Name: "Tes", StartDt: now.Add(-3 * time.Hour), EndDt: now.Add(-2 * time.Hour), CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), PropertyID: properties[0].ID, GroupID: "2", Name: "Tes", StartDt: now.Add(-2 * time.Hour), EndDt: now.Add(-1 * time.Hour), CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), PropertyID: properties[0].ID, GroupID: "1", Name: "Tes", StartDt: now.Add(-1 * time.Hour), EndDt: now.Add(0 * time.Hour), CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), PropertyID: properties[0].ID, GroupID: "2", Name: "Tes", StartDt: now.Add(0 * time.Hour), EndDt: now.Add(1 * time.Hour), CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), PropertyID: properties[0].ID, GroupID: "1", Name: "Tes", StartDt: now.Add(1 * time.Hour), EndDt: now.Add(2 * time.Hour), CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), PropertyID: properties[0].ID, GroupID: "2", Name: "Tes", StartDt: now.Add(2 * time.Hour), EndDt: now.Add(3 * time.Hour), CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), PropertyID: properties[0].ID, GroupID: "1", Name: "Tes", StartDt: now.Add(3 * time.Hour), EndDt: now.Add(4 * time.Hour), CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), PropertyID: properties[0].ID, GroupID: "2", Name: "Tes", StartDt: now.Add(4 * time.Hour), EndDt: now.Add(5 * time.Hour), CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-	}
-
-	userproperties := []model.Userproperties{
-		{ID: utils.GetUniqueID(), UserID: users[0].ID, PropertyID: properties[0].ID, DefaultProperty: true, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+	usercompanies := []model.Usercompany{
+		{ID: utils.GetUniqueID(), UserID: users[0].ID, CompanyID: companies[0].ID, DefaultCompany: true, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
 	}
 
 	conn, closeConn := db.GetConnection()
@@ -231,10 +293,11 @@ func seed() {
 	tx := conn.Begin()
 
 	tx.Create(&users)
-	tx.Create(&events)
+	tx.Create(&companies)
+	tx.Create(&companysettings)
+	tx.Create(&usercompanies)
 	tx.Create(&properties)
-	tx.Create(&propertysettings)
-	tx.Create(&userproperties)
+	tx.Create(&calendars)
 
 	err = tx.Commit().Error
 	if err != nil {

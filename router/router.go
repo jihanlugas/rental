@@ -35,6 +35,7 @@ func Init() *echo.Echo {
 
 	calendar := router.Group("/calendar")
 	calendar.GET("", calendaraController.Tes, checkToken)
+	calendar.GET("/ws", calendaraController.WsCalendar)
 
 	return router
 }
@@ -118,7 +119,7 @@ func checkTokenMiddleware() echo.MiddlewareFunc {
 			userLogin := controller.UserLogin{
 				UserID:      data[0],
 				RoleID:      data[1],
-				PropertyID:  data[2],
+				CompanyID:   data[2],
 				PassVersion: intVar,
 			}
 

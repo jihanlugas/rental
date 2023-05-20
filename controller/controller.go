@@ -16,7 +16,7 @@ var Validate *validator.CustomValidator
 type UserLogin struct {
 	UserID      string
 	RoleID      string
-	PropertyID  string
+	CompanyID   string
 	PassVersion int
 }
 
@@ -41,10 +41,10 @@ func errorInternal(c echo.Context, err error) {
 	panic(err)
 }
 
-func getLoginToken(userID string, roleID, propertyID string, passVersion int, expiredAt time.Time) (string, error) {
+func getLoginToken(userID string, roleID, companyID string, passVersion int, expiredAt time.Time) (string, error) {
 	expiredUnix := expiredAt.Unix()
 
-	token := fmt.Sprintf("%s$$%s$$%s$$%d$$%d", userID, roleID, propertyID, passVersion, expiredUnix)
+	token := fmt.Sprintf("%s$$%s$$%s$$%d$$%d", userID, roleID, companyID, passVersion, expiredUnix)
 
 	return cryption.EncryptAES64(token)
 }

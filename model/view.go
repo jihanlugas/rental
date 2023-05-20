@@ -2,7 +2,7 @@ package model
 
 import "time"
 
-type UsersView struct {
+type UserView struct {
 	ID          string     `json:"id"`
 	RoleID      string     `json:"role_id"`
 	Email       string     `json:"email"`
@@ -23,7 +23,11 @@ type UsersView struct {
 	DeleteDt    *time.Time `json:"deleteDt"`
 }
 
-type PropertiesView struct {
+func (UserView) TableName() string {
+	return "users_view"
+}
+
+type CompanyView struct {
 	ID       string     `json:"id"`
 	UserID   string     `json:"userId"`
 	Name     string     `json:"name"`
@@ -35,55 +39,66 @@ type PropertiesView struct {
 	DeleteDt *time.Time `json:"deleteDt"`
 }
 
-type PropertysettingsView struct {
+func (CompanyView) TableName() string {
+	return "companies_view"
+}
+
+type CompanysettingView struct {
 	ID               string `json:"id"`
-	DefaultTimeStart string `json:"userId"`
-	DefaultTimeEnd   string `json:"name"`
+	DefaultTimeStart int    `json:"defaultTimeStart"`
+	DefaultTimeEnd   int    `json:"defaultTimeEnd"`
 }
 
-type UserpropertiesView struct {
-	ID         string     `json:"id"`
-	UserID     string     `json:"userId"`
-	PropertyID string     `json:"propertyId"`
-	CreateBy   string     `json:"createBy"`
-	CreateDt   time.Time  `json:"createDt"`
-	UpdateBy   string     `json:"updateBy"`
-	UpdateDt   time.Time  `json:"updateDt"`
-	DeleteBy   string     `json:"deleteBy"`
-	DeleteDt   *time.Time `json:"deleteDt"`
+func (CompanysettingView) TableName() string {
+	return "companysettings_view"
 }
 
-type CalendarView struct {
-	ID         string     `json:"id"`
-	PropertyID string     `json:"propertyId"`
-	GroupID    string     `json:"groupId"`
-	Name       string     `json:"name"`
-	StartDt    time.Time  `json:"startDt"`
-	EndDt      time.Time  `json:"endDt"`
-	CreateBy   string     `json:"createBy"`
-	CreateDt   time.Time  `json:"createDt"`
-	UpdateBy   string     `json:"updateBy"`
-	UpdateDt   time.Time  `json:"updateDt"`
-	DeleteBy   string     `json:"deleteBy"`
-	DeleteDt   *time.Time `json:"deleteDt"`
+type UsercompanyView struct {
+	ID        string     `json:"id"`
+	UserID    string     `json:"userId"`
+	CompanyID string     `json:"companyId"`
+	CreateBy  string     `json:"createBy"`
+	CreateDt  time.Time  `json:"createDt"`
+	UpdateBy  string     `json:"updateBy"`
+	UpdateDt  time.Time  `json:"updateDt"`
+	DeleteBy  string     `json:"deleteBy"`
+	DeleteDt  *time.Time `json:"deleteDt"`
 }
 
-func (UsersView) TableName() string {
-	return "users_view"
+func (UsercompanyView) TableName() string {
+	return "usercompanies_view"
 }
 
-func (PropertiesView) TableName() string {
+type PropertyView struct {
+	ID          string     `json:"id"`
+	CompanyID   string     `json:"companyId"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	CreateBy    string     `json:"createBy"`
+	CreateDt    time.Time  `json:"createDt"`
+	UpdateBy    string     `json:"updateBy"`
+	UpdateDt    time.Time  `json:"updateDt"`
+	DeleteBy    string     `json:"deleteBy"`
+	DeleteDt    *time.Time `json:"deleteDt"`
+}
+
+func (PropertyView) TableName() string {
 	return "properties_view"
 }
 
-func (PropertysettingsView) TableName() string {
-	return "propertysettings_view"
-}
-
-func (UserpropertiesView) TableName() string {
-	return "userproperties_view"
+type CalendarView struct {
+	ID         string    `json:"id"`
+	CompanyID  string    `json:"companyId"`
+	PropertyID string    `json:"propertyId"`
+	Name       string    `json:"name"`
+	StartDt    time.Time `json:"startDt"`
+	EndDt      time.Time `json:"endDt"`
+	CreateBy   string    `json:"createBy"`
+	CreateDt   time.Time `json:"createDt"`
+	UpdateBy   string    `json:"updateBy"`
+	UpdateDt   time.Time `json:"updateDt"`
 }
 
 func (CalendarView) TableName() string {
-	return "calendar_view"
+	return "calendars_view"
 }
