@@ -8,4 +8,5 @@ const (
 	TokenUserContext = "usr"
 	TokenPayloadLen  = 120
 	FormatDateLayout = "2006-01-02"
+	BearerSchema     = "Bearer"
 )

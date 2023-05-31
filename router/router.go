@@ -6,15 +6,14 @@ import (
 	"github.com/jihanlugas/rental/config"
 	"github.com/jihanlugas/rental/constant"
 	"github.com/jihanlugas/rental/controller"
-	"github.com/jihanlugas/rental/cryption"
 	"github.com/jihanlugas/rental/db"
 	"github.com/jihanlugas/rental/model"
 	"github.com/jihanlugas/rental/response"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"strconv"
-	"strings"
-	"time"
+
+	_ "github.com/jihanlugas/rental/docs"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func Init() *echo.Echo {
@@ -22,20 +21,40 @@ func Init() *echo.Echo {
 	checkToken := checkTokenMiddleware()
 	//router.Use(middleware.Logger())
 
-	calendaraController := controller.CalendarComposer()
+	calendarController := controller.CalendarComposer()
 	userController := controller.UserComposer()
+	companyController := controller.CompanyComposer()
+	propertyController := controller.PropertyComposer()
+
+	router.GET("/swg/*", echoSwagger.WrapHandler)
 
 	router.GET("/", controller.Ping)
-
 	router.POST("/sign-in", userController.SignIn)
 	router.GET("/sign-out", userController.SignOut)
 	router.GET("/refresh-token", userController.RefreshToken, checkToken)
-
 	router.GET("/init", userController.Init, checkToken)
 
+	user := router.Group("/user")
+	user.GET("/:id", userController.GetById)
+
+	company := router.Group("/company")
+	company.GET("/:id", companyController.GetById)
+	company.POST("", companyController.Create, checkToken)
+	company.PUT("/:id", companyController.Update, checkToken)
+	company.DELETE("/:id", companyController.Delete, checkToken)
+
 	calendar := router.Group("/calendar")
-	calendar.GET("", calendaraController.Tes, checkToken)
-	calendar.GET("/ws", calendaraController.WsCalendar)
+	calendar.GET("/:id", calendarController.GetById)
+	calendar.POST("", calendarController.Create, checkToken)
+	calendar.PUT("/:id", calendarController.Update, checkToken)
+	calendar.DELETE("/:id", calendarController.Delete, checkToken)
+	calendar.GET("/ws", calendarController.WsCalendar)
+
+	property := router.Group("/property")
+	property.GET("/:id", propertyController.GetById)
+	property.POST("", propertyController.Create, checkToken)
+	property.PUT("/:id", propertyController.Update, checkToken)
+	property.DELETE("/:id", propertyController.Delete, checkToken)
 
 	return router
 }
@@ -88,39 +107,10 @@ func checkTokenMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			var err error
-			token := c.Request().Header.Get(config.HeaderAuthName)
 
-			tokenPayload, err := cryption.DecryptAES64(token)
+			userLogin, err := controller.ExtractClaims(c.Request().Header.Get(config.HeaderAuthName))
 			if err != nil {
-				return response.ErrorForce(http.StatusUnauthorized, "Unauthorized", response.Payload{}).SendJSON(c)
-			}
-
-			data := strings.Split(tokenPayload, "$$")
-			if len(data) != 5 {
-				return response.ErrorForce(http.StatusUnauthorized, "Unauthorized.", response.Payload{}).SendJSON(c)
-			}
-
-			expiredUnix, err := strconv.ParseInt(data[4], 10, 64)
-			if err != nil {
-				return response.ErrorForce(http.StatusUnauthorized, "Token Expired.", response.Payload{}).SendJSON(c)
-			}
-
-			expiredAt := time.Unix(expiredUnix, 0)
-			now := time.Now()
-			if now.After(expiredAt) {
-				return response.ErrorForce(http.StatusUnauthorized, "Token Expired..", response.Payload{}).SendJSON(c)
-			}
-
-			intVar, err := strconv.Atoi(data[3])
-			if err != nil {
-				return response.ErrorForce(http.StatusUnauthorized, "Token Expired...", response.Payload{}).SendJSON(c)
-			}
-
-			userLogin := controller.UserLogin{
-				UserID:      data[0],
-				RoleID:      data[1],
-				CompanyID:   data[2],
-				PassVersion: intVar,
+				return response.ErrorForce(http.StatusUnauthorized, err.Error(), response.Payload{}).SendJSON(c)
 			}
 
 			conn, closeConn := db.GetConnection()

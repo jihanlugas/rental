@@ -27,6 +27,7 @@ var (
 	ListenTo               targetServer
 	DBInfo                 dbServerInfo
 	CryptoKey              string
+	JwtSecretKey           string
 	HeaderAuthName         string
 	AuthTokenExpiredHour   int64
 	SecureServer           bool
@@ -64,6 +65,9 @@ func init() {
 	hasher := md5.New()
 	hasher.Write([]byte(os.Getenv("CRYPTO_KEY")))
 	CryptoKey = hex.EncodeToString(hasher.Sum(nil))
+
+	hasher.Write([]byte(os.Getenv("JWT_SECRET_KEY")))
+	JwtSecretKey = hex.EncodeToString(hasher.Sum(nil))
 
 	HeaderAuthName = os.Getenv("HEADER_AUTH_NAME")
 	AuthTokenExpiredHour, err = strconv.ParseInt(os.Getenv("AUTH_TOKEN_EXPIRED_HOUR"), 10, 64)

@@ -64,11 +64,6 @@ func (r *Response) SendJSON(c echo.Context) error {
 //	}
 //}
 
-func getListError(err error) Payload {
-	listError := Payload{}
-	return listError
-}
-
 func ValidationError(err error) *Payload {
 	return &Payload{
 		"listError": getListError(err),

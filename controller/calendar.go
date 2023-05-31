@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/jihanlugas/rental/db"
@@ -9,7 +10,9 @@ import (
 	"github.com/jihanlugas/rental/request"
 	"github.com/jihanlugas/rental/response"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 	"net/http"
+	"time"
 )
 
 type Calendar struct{}
@@ -37,6 +40,7 @@ func getCalendarData(CompanyID string, CalendarMessage request.WsCalendarMessage
 	err = conn.Where("company_id = ? ", CompanyID).
 		Where("start_dt <= ? ", CalendarMessage.EndDt).
 		Where("end_dt >= ? ", CalendarMessage.StartDt).
+		Where("delete_dt IS NULL ").
 		Find(&ListCalendar).Error
 	if err != nil {
 		return response.Error(http.StatusInternalServerError, "error", response.Payload{})
@@ -124,29 +128,225 @@ func (h Calendar) WsCalendar(c echo.Context) error {
 	return nil
 }
 
-func (h Calendar) Tes(c echo.Context) error {
+// GetById godoc
+// @Tags Calendar
+// @Summary To do get a user
+// @Accept json
+// @Produce json
+// @Param id path string true "Calendar ID"
+// @Success      200  {object}	response.Response
+// @Failure      500  {object}  response.Response
+// @Router /calendar/{id} [get]
+func (h Calendar) GetById(c echo.Context) error {
 	var err error
-	var ListCalendar []model.CalendarView
-	var ListProperty []model.PropertyView
+	var calendar model.CalendarView
 
 	conn, closeConn := db.GetConnection()
 	defer closeConn()
+
+	ID := c.Param("id")
+	if ID == "" {
+		return response.Error(http.StatusBadRequest, "data not found", response.Payload{}).SendJSON(c)
+	}
+
+	err = conn.Where("id = ? ", ID).First(&calendar).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.Error(http.StatusBadRequest, "data not found", response.Payload{}).SendJSON(c)
+		}
 		errorInternal(c, err)
 	}
 
-	err = conn.Find(&ListCalendar).Error
-	if err != nil {
-		errorInternal(c, err)
-	}
-
-	err = conn.Find(&ListProperty).Error
-	if err != nil {
-		errorInternal(c, err)
-	}
-
-	return response.Success(http.StatusOK, "success", response.Payload{
-		"calendars":  ListCalendar,
-		"properties": ListProperty,
-	}).SendJSON(c)
+	return response.Success(http.StatusOK, "success", calendar).SendJSON(c)
 }
+
+// Create godoc
+// @Tags Calendar
+// @Summary To do create new election
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param req body request.CreateCalendar true "json req body"
+// @Success      200  {object}	response.Response
+// @Failure      500  {object}  response.Response
+// @Router /calendar [post]
+func (h Calendar) Create(c echo.Context) error {
+	var err error
+	var calendar model.Calendar
+
+	loginUser, err := getUserLoginInfo(c)
+	if err != nil {
+		errorInternal(c, err)
+	}
+
+	req := new(request.CreateCalendar)
+	if err = c.Bind(req); err != nil {
+		return err
+	}
+
+	if err = c.Validate(req); err != nil {
+		return response.Error(http.StatusBadRequest, "error validation", response.ValidationError(err)).SendJSON(c)
+	}
+
+	conn, closeConn := db.GetConnection()
+	defer closeConn()
+
+	tx := conn.Begin()
+
+	calendar = model.Calendar{
+		CompanyID:  loginUser.CompanyID,
+		PropertyID: req.PropertyID,
+		Name:       req.Name,
+		StartDt:    *req.StartDt,
+		EndDt:      *req.EndDt,
+		Status:     0,
+		CreateBy:   loginUser.UserID,
+		UpdateBy:   loginUser.UserID,
+	}
+
+	tx.Save(&calendar)
+
+	err = tx.Commit().Error
+	if err != nil {
+		errorInternal(c, err)
+	}
+
+	return response.Success(http.StatusCreated, "success", response.Payload{}).SendJSON(c)
+}
+
+// Update godoc
+// @Tags Calendar
+// @Summary To do update a calendar
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path string true "Calendar ID"
+// @Param req body request.UpdateCalendar true "json req body"
+// @Success      200  {object}	response.Response
+// @Failure      500  {object}  response.Response
+// @Router /calendar/{id} [put]
+func (h Calendar) Update(c echo.Context) error {
+	var err error
+	var calendar model.Calendar
+
+	loginUser, err := getUserLoginInfo(c)
+	if err != nil {
+		errorInternal(c, err)
+	}
+
+	ID := c.Param("id")
+	if ID == "" {
+		return response.Error(http.StatusBadRequest, "data not found", response.Payload{}).SendJSON(c)
+	}
+
+	req := new(request.UpdateCalendar)
+	if err = c.Bind(req); err != nil {
+		return err
+	}
+
+	conn, closeConn := db.GetConnection()
+	defer closeConn()
+
+	err = conn.Where("id = ? ", ID).First(&calendar).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.Error(http.StatusBadRequest, "data not found", response.Payload{}).SendJSON(c)
+		}
+		errorInternal(c, err)
+	}
+
+	tx := conn.Begin()
+
+	calendar.PropertyID = req.PropertyID
+	calendar.Name = req.Name
+	calendar.StartDt = *req.StartDt
+	calendar.EndDt = *req.EndDt
+	calendar.UpdateBy = loginUser.UserID
+
+	tx.Save(&calendar)
+
+	err = tx.Commit().Error
+	if err != nil {
+		errorInternal(c, err)
+	}
+
+	return response.Success(http.StatusAccepted, "success", response.Payload{}).SendJSON(c)
+}
+
+// Delete Calendar
+// @Summary Delete Calendar
+// @Tags Calendar
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path string true "Calendar ID"
+// @Success      200  {object}	response.Response
+// @Failure      500  {object}  response.Response
+// @Router /calendar/{id} [delete]
+func (h Calendar) Delete(c echo.Context) error {
+	var err error
+	var calendar model.Calendar
+
+	loginUser, err := getUserLoginInfo(c)
+	if err != nil {
+		errorInternal(c, err)
+	}
+
+	ID := c.Param("id")
+	if ID == "" {
+		return response.Error(http.StatusBadRequest, "data not found", response.Payload{}).SendJSON(c)
+	}
+
+	conn, closeConn := db.GetConnection()
+	defer closeConn()
+
+	err = conn.Where("id = ? ", ID).First(&calendar).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.Error(http.StatusBadRequest, "data not found", response.Payload{}).SendJSON(c)
+		}
+		errorInternal(c, err)
+	}
+
+	tx := conn.Begin()
+
+	now := time.Now()
+
+	calendar.DeleteBy = loginUser.UserID
+	calendar.DeleteDt = &now
+	tx.Save(&calendar)
+
+	err = tx.Commit().Error
+	if err != nil {
+		errorInternal(c, err)
+	}
+
+	return response.Success(http.StatusAccepted, "success", response.Payload{}).SendJSON(c)
+}
+
+//func (h Calendar) Tes(c echo.Context) error {
+//	var err error
+//	var ListCalendar []model.CalendarView
+//	var ListProperty []model.PropertyView
+//
+//	conn, closeConn := db.GetConnection()
+//	defer closeConn()
+//	if err != nil {
+//		errorInternal(c, err)
+//	}
+//
+//	err = conn.Find(&ListCalendar).Error
+//	if err != nil {
+//		errorInternal(c, err)
+//	}
+//
+//	err = conn.Find(&ListProperty).Error
+//	if err != nil {
+//		errorInternal(c, err)
+//	}
+//
+//	return response.Success(http.StatusOK, "success", response.Payload{
+//		"calendars":  ListCalendar,
+//		"properties": ListProperty,
+//	}).SendJSON(c)
+//}

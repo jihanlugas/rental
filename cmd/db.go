@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/jihanlugas/rental/cryption"
 	"github.com/jihanlugas/rental/db"
 	"github.com/jihanlugas/rental/model"
@@ -99,40 +100,42 @@ func up() {
 
 	// view
 	vUser := conn.Model(&model.User{}).
-		Where("delete_dt is null")
+		Select("users.*, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
+		Joins("left join users u1 on u1.id = users.create_by").
+		Joins("left join users u2 on u2.id = users.update_by").
+		Joins("left join users u3 on u3.id = users.delete_by")
 
 	vCompany := conn.Model(&model.Company{}).
+		Select("companies.*, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
 		Joins("join users on users.id = companies.user_id ").
-		Where("companies.delete_dt is null")
+		Joins("left join users u1 on u1.id = companies.create_by").
+		Joins("left join users u2 on u2.id = companies.update_by").
+		Joins("left join users u3 on u3.id = companies.delete_by")
 
 	vCompanysetting := conn.Model(&model.Companysetting{}).
-		Joins("join companies on companies.id = companysettings.id ").
-		Where("companies.delete_dt is null")
+		Select("companysettings.*").
+		Joins("join companies on companies.id = companysettings.id ")
 
 	vUsercompany := conn.Model(&model.Usercompany{}).
+		Select("usercompanies.*, users.fullname, companies.name, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
 		Joins("join users on users.id = usercompanies.user_id").
 		Joins("join companies on companies.id = usercompanies.company_id ").
-		Where("usercompanies.delete_dt is null")
+		Joins("left join users u1 on u1.id = usercompanies.create_by").
+		Joins("left join users u2 on u2.id = usercompanies.update_by").
+		Joins("left join users u3 on u3.id = usercompanies.delete_by")
 
 	vProperty := conn.Model(&model.Property{}).
+		Select("properties.*, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
 		Joins("join companies on companies.id = properties.company_id ").
-		Where("companies.delete_dt is null")
+		Joins("left join users u1 on u1.id = properties.create_by").
+		Joins("left join users u2 on u2.id = properties.update_by").
+		Joins("left join users u3 on u3.id = properties.delete_by")
 
 	vCalendar := conn.Model(&model.Calendar{}).
-		Select(
-			"calendars.id",
-			"calendars.company_id",
-			"calendars.property_id",
-			"calendars.name",
-			"calendars.start_dt",
-			"calendars.end_dt",
-			"calendars.status",
-			"calendars.create_by",
-			"calendars.create_dt",
-			"calendars.update_by",
-			"calendars.update_dt",
-		).
-		Where("delete_dt is null")
+		Select("calendars.*, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
+		Joins("left join users u1 on u1.id = calendars.create_by").
+		Joins("left join users u2 on u2.id = calendars.update_by").
+		Joins("left join users u3 on u3.id = calendars.delete_by")
 
 	err = conn.Migrator().CreateView("users_view", gorm.ViewOption{
 		Replace: true,
@@ -266,21 +269,14 @@ func seed() {
 		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, Name: "Lapangan 3", Description: "Description"},
 	}
 
-	calendars := []model.Calendar{
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: "Tes", StartDt: now.Add(-5 * time.Hour), EndDt: now.Add(-4 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: "Tes", StartDt: now.Add(-4 * time.Hour), EndDt: now.Add(-3 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: "Tes", StartDt: now.Add(-3 * time.Hour), EndDt: now.Add(-2 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: "Tes", StartDt: now.Add(-2 * time.Hour), EndDt: now.Add(-1 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: "Tes", StartDt: now.Add(-1 * time.Hour), EndDt: now.Add(0 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: "Tes", StartDt: now.Add(0 * time.Hour), EndDt: now.Add(1 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: "Tes", StartDt: now.Add(1 * time.Hour), EndDt: now.Add(2 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: "Tes", StartDt: now.Add(2 * time.Hour), EndDt: now.Add(3 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: "Tes", StartDt: now.Add(3 * time.Hour), EndDt: now.Add(4 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: "Tes", StartDt: now.Add(4 * time.Hour), EndDt: now.Add(5 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: "Tes", StartDt: now.Add(6 * time.Hour), EndDt: now.Add(8 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: "Tes", StartDt: now.Add(8 * time.Hour), EndDt: now.Add(10 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: "Tes", StartDt: now.Add(10 * time.Hour), EndDt: now.Add(12 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: "Tes", StartDt: now.Add(12 * time.Hour), EndDt: now.Add(14 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+	calendars := []model.Calendar{}
+	startDedault := now.Add(-96 * time.Hour)
+	for i := 0; i < 20; i++ {
+		new1 := model.Calendar{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(2 * time.Hour), EndDt: startDedault.Add(4 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
+		new2 := model.Calendar{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(6 * time.Hour), EndDt: startDedault.Add(8 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
+		new3 := model.Calendar{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(10 * time.Hour), EndDt: startDedault.Add(12 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
+		calendars = append(calendars, new1, new2, new3)
+		startDedault = startDedault.Add(16 * time.Hour)
 	}
 
 	usercompanies := []model.Usercompany{

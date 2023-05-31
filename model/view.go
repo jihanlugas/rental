@@ -21,6 +21,9 @@ type UserView struct {
 	UpdateDt    time.Time  `json:"updateDt"`
 	DeleteBy    string     `json:"deleteBy"`
 	DeleteDt    *time.Time `json:"deleteDt"`
+	CreateName  string     `json:"createName"`
+	UpdateName  string     `json:"updateName"`
+	DeleteName  string     `json:"deleteName"`
 }
 
 func (UserView) TableName() string {
@@ -28,15 +31,18 @@ func (UserView) TableName() string {
 }
 
 type CompanyView struct {
-	ID       string     `json:"id"`
-	UserID   string     `json:"userId"`
-	Name     string     `json:"name"`
-	CreateBy string     `json:"createBy"`
-	CreateDt time.Time  `json:"createDt"`
-	UpdateBy string     `json:"updateBy"`
-	UpdateDt time.Time  `json:"updateDt"`
-	DeleteBy string     `json:"deleteBy"`
-	DeleteDt *time.Time `json:"deleteDt"`
+	ID         string     `json:"id"`
+	UserID     string     `json:"userId"`
+	Name       string     `json:"name"`
+	CreateBy   string     `json:"createBy"`
+	CreateDt   time.Time  `json:"createDt"`
+	UpdateBy   string     `json:"updateBy"`
+	UpdateDt   time.Time  `json:"updateDt"`
+	DeleteBy   string     `json:"deleteBy"`
+	DeleteDt   *time.Time `json:"deleteDt"`
+	CreateName string     `json:"createName"`
+	UpdateName string     `json:"updateName"`
+	DeleteName string     `json:"deleteName"`
 }
 
 func (CompanyView) TableName() string {
@@ -54,15 +60,20 @@ func (CompanysettingView) TableName() string {
 }
 
 type UsercompanyView struct {
-	ID        string     `json:"id"`
-	UserID    string     `json:"userId"`
-	CompanyID string     `json:"companyId"`
-	CreateBy  string     `json:"createBy"`
-	CreateDt  time.Time  `json:"createDt"`
-	UpdateBy  string     `json:"updateBy"`
-	UpdateDt  time.Time  `json:"updateDt"`
-	DeleteBy  string     `json:"deleteBy"`
-	DeleteDt  *time.Time `json:"deleteDt"`
+	ID         string     `json:"id"`
+	UserID     string     `json:"userId"`
+	CompanyID  string     `json:"companyId"`
+	CreateBy   string     `json:"createBy"`
+	CreateDt   time.Time  `json:"createDt"`
+	UpdateBy   string     `json:"updateBy"`
+	UpdateDt   time.Time  `json:"updateDt"`
+	DeleteBy   string     `json:"deleteBy"`
+	DeleteDt   *time.Time `json:"deleteDt"`
+	Fullname   string     `json:"fullname"`
+	Name       string     `json:"name"`
+	CreateName string     `json:"createName"`
+	UpdateName string     `json:"updateName"`
+	DeleteName string     `json:"deleteName"`
 }
 
 func (UsercompanyView) TableName() string {
@@ -80,6 +91,9 @@ type PropertyView struct {
 	UpdateDt    time.Time  `json:"updateDt"`
 	DeleteBy    string     `json:"deleteBy"`
 	DeleteDt    *time.Time `json:"deleteDt"`
+	CreateName  string     `json:"createName"`
+	UpdateName  string     `json:"updateName"`
+	DeleteName  string     `json:"deleteName"`
 }
 
 func (PropertyView) TableName() string {
@@ -87,16 +101,21 @@ func (PropertyView) TableName() string {
 }
 
 type CalendarView struct {
-	ID         string    `json:"id"`
-	CompanyID  string    `json:"companyId"`
-	PropertyID string    `json:"propertyId"`
-	Name       string    `json:"name"`
-	StartDt    time.Time `json:"startDt"`
-	EndDt      time.Time `json:"endDt"`
-	CreateBy   string    `json:"createBy"`
-	CreateDt   time.Time `json:"createDt"`
-	UpdateBy   string    `json:"updateBy"`
-	UpdateDt   time.Time `json:"updateDt"`
+	ID         string     `json:"id"`
+	CompanyID  string     `json:"companyId"`
+	PropertyID string     `json:"propertyId"`
+	Name       string     `json:"name"`
+	StartDt    time.Time  `json:"startDt"`
+	EndDt      time.Time  `json:"endDt"`
+	CreateBy   string     `json:"createBy"`
+	CreateDt   time.Time  `json:"createDt"`
+	UpdateBy   string     `json:"updateBy"`
+	UpdateDt   time.Time  `json:"updateDt"`
+	DeleteBy   string     `json:"deleteBy"`
+	DeleteDt   *time.Time `json:"deleteDt"`
+	CreateName string     `json:"createName"`
+	UpdateName string     `json:"updateName"`
+	DeleteName string     `json:"deleteName"`
 }
 
 func (CalendarView) TableName() string {

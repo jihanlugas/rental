@@ -21,6 +21,38 @@ func UserComposer() User {
 	return User{}
 }
 
+func (h User) GetById(c echo.Context) error {
+	var err error
+	var user model.UserView
+
+	conn, closeConn := db.GetConnection()
+	defer closeConn()
+
+	ID := c.Param("id")
+	if ID == "" {
+		return response.Error(http.StatusBadRequest, "data not found", response.Payload{}).SendJSON(c)
+	}
+
+	err = conn.Where("id = ? ", ID).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.Error(http.StatusBadRequest, "data not found", response.Payload{}).SendJSON(c)
+		}
+		errorInternal(c, err)
+	}
+
+	return response.Success(http.StatusOK, "success", user).SendJSON(c)
+}
+
+// SignIn Sign In user
+// @Summary Sign in a user
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param req body request.Signin true "json req body"
+// @Success      200  {object}	response.Response
+// @Failure      500  {object}  response.Response
+// @Router /sign-in [post]
 func (h User) SignIn(c echo.Context) error {
 	var err error
 	var user model.User
@@ -88,9 +120,9 @@ func (h User) SignIn(c echo.Context) error {
 	}
 
 	expiredAt := time.Now().Add(time.Hour * time.Duration(config.AuthTokenExpiredHour))
-	token, err := getLoginToken(user.ID, user.RoleID, usercompany.CompanyID, user.PassVersion, expiredAt)
+	token, err := CreateToken(user.ID, user.RoleID, usercompany.CompanyID, user.PassVersion, expiredAt)
 	if err != nil {
-		return response.Error(http.StatusBadRequest, "generate token failed", response.Payload{}).SendJSON(c)
+		return response.Error(http.StatusBadRequest, "Failed generate token", response.Payload{}).SendJSON(c)
 	}
 
 	return response.Success(http.StatusOK, "success", response.Payload{
@@ -158,9 +190,9 @@ func (h User) RefreshToken(c echo.Context) error {
 	}
 
 	expiredAt := time.Now().Add(time.Hour * time.Duration(config.AuthTokenExpiredHour))
-	token, err := getLoginToken(loginUser.UserID, loginUser.RoleID, loginUser.CompanyID, loginUser.PassVersion, expiredAt)
+	token, err := CreateToken(loginUser.UserID, loginUser.RoleID, loginUser.CompanyID, loginUser.PassVersion, expiredAt)
 	if err != nil {
-		return response.ErrorForce(http.StatusBadRequest, "generate token failed", response.Payload{}).SendJSON(c)
+		return response.ErrorForce(http.StatusBadRequest, "Failed generate token", response.Payload{}).SendJSON(c)
 	}
 
 	return response.Success(http.StatusOK, "success", response.Payload{
