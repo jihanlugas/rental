@@ -82,6 +82,62 @@ const docTemplate = `{
                 }
             }
         },
+        "/calendar/timeline": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Calendar"
+                ],
+                "summary": "To do create new election",
+                "parameters": [
+                    {
+                        "description": "json req body",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.Timeline"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "payload": {
+                                            "$ref": "#/definitions/response.Timeline"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/calendar/{id}": {
             "get": {
                 "consumes": [
@@ -589,6 +645,100 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.CalendarView": {
+            "type": "object",
+            "properties": {
+                "companyId": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "string"
+                },
+                "createDt": {
+                    "type": "string"
+                },
+                "createName": {
+                    "type": "string"
+                },
+                "deleteBy": {
+                    "type": "string"
+                },
+                "deleteDt": {
+                    "type": "string"
+                },
+                "deleteName": {
+                    "type": "string"
+                },
+                "endDt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "propertyId": {
+                    "type": "string"
+                },
+                "startDt": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "string"
+                },
+                "updateDt": {
+                    "type": "string"
+                },
+                "updateName": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.PropertyView": {
+            "type": "object",
+            "properties": {
+                "companyId": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "string"
+                },
+                "createDt": {
+                    "type": "string"
+                },
+                "createName": {
+                    "type": "string"
+                },
+                "deleteBy": {
+                    "type": "string"
+                },
+                "deleteDt": {
+                    "type": "string"
+                },
+                "deleteName": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "string"
+                },
+                "updateDt": {
+                    "type": "string"
+                },
+                "updateName": {
+                    "type": "string"
+                }
+            }
+        },
         "request.CreateCalendar": {
             "type": "object",
             "required": [
@@ -654,6 +804,25 @@ const docTemplate = `{
                     "maxLength": 200
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.Timeline": {
+            "type": "object",
+            "required": [
+                "companyId",
+                "endDt",
+                "startDt"
+            ],
+            "properties": {
+                "companyId": {
+                    "type": "string"
+                },
+                "endDt": {
+                    "type": "string"
+                },
+                "startDt": {
                     "type": "string"
                 }
             }
@@ -725,6 +894,23 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "boolean"
+                }
+            }
+        },
+        "response.Timeline": {
+            "type": "object",
+            "properties": {
+                "calendars": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.CalendarView"
+                    }
+                },
+                "properties": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.PropertyView"
+                    }
                 }
             }
         }

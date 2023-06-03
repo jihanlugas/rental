@@ -1,4 +1,66 @@
 definitions:
+  model.CalendarView:
+    properties:
+      companyId:
+        type: string
+      createBy:
+        type: string
+      createDt:
+        type: string
+      createName:
+        type: string
+      deleteBy:
+        type: string
+      deleteDt:
+        type: string
+      deleteName:
+        type: string
+      endDt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      propertyId:
+        type: string
+      startDt:
+        type: string
+      updateBy:
+        type: string
+      updateDt:
+        type: string
+      updateName:
+        type: string
+    type: object
+  model.PropertyView:
+    properties:
+      companyId:
+        type: string
+      createBy:
+        type: string
+      createDt:
+        type: string
+      createName:
+        type: string
+      deleteBy:
+        type: string
+      deleteDt:
+        type: string
+      deleteName:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updateBy:
+        type: string
+      updateDt:
+        type: string
+      updateName:
+        type: string
+    type: object
   request.CreateCalendar:
     properties:
       endDt:
@@ -46,6 +108,19 @@ definitions:
     - passwd
     - username
     type: object
+  request.Timeline:
+    properties:
+      companyId:
+        type: string
+      endDt:
+        type: string
+      startDt:
+        type: string
+    required:
+    - companyId
+    - endDt
+    - startDt
+    type: object
   request.UpdateCalendar:
     properties:
       endDt:
@@ -92,6 +167,17 @@ definitions:
         type: object
       status:
         type: boolean
+    type: object
+  response.Timeline:
+    properties:
+      calendars:
+        items:
+          $ref: '#/definitions/model.CalendarView'
+        type: array
+      properties:
+        items:
+          $ref: '#/definitions/model.PropertyView'
+        type: array
     type: object
 host: localhost:1323
 info:
@@ -219,6 +305,38 @@ paths:
       security:
       - BearerAuth: []
       summary: To do update a calendar
+      tags:
+      - Calendar
+  /calendar/timeline:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: json req body
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/request.Timeline'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                payload:
+                  $ref: '#/definitions/response.Timeline'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: To do create new election
       tags:
       - Calendar
   /company:

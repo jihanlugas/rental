@@ -162,7 +162,7 @@ func (h Calendar) GetById(c echo.Context) error {
 
 // Create godoc
 // @Tags Calendar
-// @Summary To do create new election
+// @Summary To do create new calendar event
 // @Security BearerAuth
 // @Accept json
 // @Produce json
@@ -322,6 +322,55 @@ func (h Calendar) Delete(c echo.Context) error {
 	}
 
 	return response.Success(http.StatusAccepted, "success", response.Payload{}).SendJSON(c)
+}
+
+// Timeline
+// @Tags Calendar
+// @Summary To do get data timeline
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param req body request.Timeline true "json req body"
+// @Success      200  {object}	response.Response{payload=response.Timeline}
+// @Failure      500  {object}  response.Response
+// @Router /calendar/timeline [post]
+func (h Calendar) Timeline(c echo.Context) error {
+	var err error
+	var ListCalendar []model.CalendarView
+	var ListProperty []model.PropertyView
+
+	req := new(request.Timeline)
+	if err = c.Bind(req); err != nil {
+		return err
+	}
+
+	if err = c.Validate(req); err != nil {
+		return response.Error(http.StatusBadRequest, "error validation", response.ValidationError(err)).SendJSON(c)
+	}
+
+	conn, closeConn := db.GetConnection()
+	defer closeConn()
+
+	err = conn.Where("company_id = ? ", req.CompanyID).
+		Where("start_dt <= ? ", req.EndDt).
+		Where("end_dt >= ? ", req.StartDt).
+		Where("delete_dt IS NULL ").
+		Find(&ListCalendar).Error
+	if err != nil {
+		return response.Error(http.StatusInternalServerError, "error", response.Payload{})
+	}
+
+	err = conn.Where("company_id = ? ", req.CompanyID).Find(&ListProperty).Error
+	if err != nil {
+		return response.Error(http.StatusInternalServerError, "error", response.Payload{})
+	}
+
+	res := response.Timeline{
+		ListCalendar: ListCalendar,
+		ListProperty: ListProperty,
+	}
+
+	return response.Success(http.StatusCreated, "success", res).SendJSON(c)
 }
 
 //func (h Calendar) Tes(c echo.Context) error {

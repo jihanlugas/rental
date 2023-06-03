@@ -49,6 +49,7 @@ func Init() *echo.Echo {
 	calendar.PUT("/:id", calendarController.Update, checkToken)
 	calendar.DELETE("/:id", calendarController.Delete, checkToken)
 	calendar.GET("/ws", calendarController.WsCalendar)
+	calendar.POST("/timeline", calendarController.Timeline, checkToken)
 
 	property := router.Group("/property")
 	property.GET("/:id", propertyController.GetById)

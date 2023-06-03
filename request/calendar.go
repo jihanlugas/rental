@@ -26,3 +26,9 @@ type UpdateCalendar struct {
 	StartDt    *time.Time `json:"startDt" validate:"required"`
 	EndDt      *time.Time `json:"endDt" validate:"required"`
 }
+
+type Timeline struct {
+	CompanyID string     `json:"companyId" validate:"required"`
+	StartDt   *time.Time `json:"startDt" validate:"required"`
+	EndDt     *time.Time `json:"endDt" validate:"required"`
+}
