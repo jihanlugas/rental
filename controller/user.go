@@ -151,7 +151,7 @@ func (h User) Init(c echo.Context) error {
 	err = conn.Where("id = ? ", loginUser.UserID).First(&userview).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return response.Error(http.StatusBadRequest, "record not found", response.Payload{}).SendJSON(c)
+			return response.Error(http.StatusBadRequest, "1record not found", response.Payload{}).SendJSON(c)
 		}
 		errorInternal(c, err)
 	}
@@ -159,7 +159,7 @@ func (h User) Init(c echo.Context) error {
 	err = conn.Where("id = ? ", loginUser.CompanyID).First(&companyview).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return response.Error(http.StatusBadRequest, "record not found", response.Payload{}).SendJSON(c)
+			return response.Error(http.StatusBadRequest, "2record not found", response.Payload{}).SendJSON(c)
 		}
 		errorInternal(c, err)
 	}
@@ -167,7 +167,7 @@ func (h User) Init(c echo.Context) error {
 	err = conn.Where("id = ? ", loginUser.CompanyID).First(&companysettingview).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return response.Error(http.StatusBadRequest, "record not found", response.Payload{}).SendJSON(c)
+			return response.Error(http.StatusBadRequest, "3record not found", response.Payload{}).SendJSON(c)
 		}
 		errorInternal(c, err)
 	}

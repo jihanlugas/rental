@@ -251,49 +251,50 @@ func seed() {
 	if err != nil {
 		panic(err)
 	}
-	users := []model.User{
-		{ID: utils.GetUniqueID(), RoleID: utils.GetUniqueID(), Email: "jihanlugas2@gmail.com", Username: "jihanlugas", NoHp: "6287770333043", Fullname: "Jihan Lugas", Passwd: password, PassVersion: 1, Active: true, LastLoginDt: nil, PhotoID: "", CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-	}
-
-	companies := []model.Company{
-		{ID: utils.GetUniqueID(), UserID: users[0].ID, Name: "Company 1", CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-	}
-
-	companysettings := []model.Companysetting{
-		{ID: companies[0].ID, DefaultTimeStart: 12, DefaultTimeEnd: 12},
-	}
-
-	properties := []model.Property{
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, Name: "Lapangan 1", Description: "Description"},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, Name: "Lapangan 2", Description: "Description"},
-		{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, Name: "Lapangan 3", Description: "Description"},
-	}
-
-	calendars := []model.Calendar{}
-	startDedault := now.Add(-96 * time.Hour)
-	for i := 0; i < 20; i++ {
-		new1 := model.Calendar{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(2 * time.Hour), EndDt: startDedault.Add(4 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
-		new2 := model.Calendar{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(6 * time.Hour), EndDt: startDedault.Add(8 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
-		new3 := model.Calendar{ID: utils.GetUniqueID(), CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(10 * time.Hour), EndDt: startDedault.Add(12 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
-		calendars = append(calendars, new1, new2, new3)
-		startDedault = startDedault.Add(16 * time.Hour)
-	}
-
-	usercompanies := []model.Usercompany{
-		{ID: utils.GetUniqueID(), UserID: users[0].ID, CompanyID: companies[0].ID, DefaultCompany: true, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
-	}
 
 	conn, closeConn := db.GetConnection()
 	defer closeConn()
 
 	tx := conn.Begin()
 
+	users := []model.User{
+		{RoleID: utils.GetUniqueID(), Email: "jihanlugas2@gmail.com", Username: "jihanlugas", NoHp: "6287770333043", Fullname: "Jihan Lugas", Passwd: password, PassVersion: 1, Active: true, LastLoginDt: nil, PhotoID: "", CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+	}
+
 	tx.Create(&users)
+
+	companies := []model.Company{
+		{UserID: users[0].ID, Name: "Company 1", CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+	}
 	tx.Create(&companies)
+
+	companysettings := []model.Companysetting{
+		{ID: companies[0].ID, DefaultTimeStart: 12, DefaultTimeEnd: 12},
+	}
 	tx.Create(&companysettings)
-	tx.Create(&usercompanies)
+
+	properties := []model.Property{
+		{CompanyID: companies[0].ID, Name: "Lapangan 1", Description: "Description"},
+		{CompanyID: companies[0].ID, Name: "Lapangan 2", Description: "Description"},
+		{CompanyID: companies[0].ID, Name: "Lapangan 3", Description: "Description"},
+	}
 	tx.Create(&properties)
+
+	calendars := []model.Calendar{}
+	startDedault := now.Add(-96 * time.Hour)
+	for i := 0; i < 20; i++ {
+		new1 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(2 * time.Hour), EndDt: startDedault.Add(4 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
+		new2 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(6 * time.Hour), EndDt: startDedault.Add(8 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
+		new3 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(10 * time.Hour), EndDt: startDedault.Add(12 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
+		calendars = append(calendars, new1, new2, new3)
+		startDedault = startDedault.Add(16 * time.Hour)
+	}
 	tx.Create(&calendars)
+
+	usercompanies := []model.Usercompany{
+		{UserID: users[0].ID, CompanyID: companies[0].ID, DefaultCompany: true, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+	}
+	tx.Create(&usercompanies)
 
 	err = tx.Commit().Error
 	if err != nil {

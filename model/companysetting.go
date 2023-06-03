@@ -6,7 +6,9 @@ import (
 )
 
 func (u *Companysetting) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = utils.GetUniqueID()
+	if u.ID == "" {
+		u.ID = utils.GetUniqueID()
+	}
 	return
 }
 
