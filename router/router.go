@@ -53,6 +53,8 @@ func Init() *echo.Echo {
 
 	property := router.Group("/property")
 	property.GET("/:id", propertyController.GetById)
+	property.POST("/page", propertyController.Page, checkToken)
+	property.POST("/list", propertyController.List)
 	property.POST("", propertyController.Create, checkToken)
 	property.PUT("/:id", propertyController.Update, checkToken)
 	property.DELETE("/:id", propertyController.Delete, checkToken)

@@ -18,6 +18,146 @@ func PropertyComposer() Property {
 	return Property{}
 }
 
+// Page Property
+// @Summary Page Property
+// @Tags Property
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param req body request.PageProperty true "payload"
+// @Success      200  {object}	response.Response{payload=response.Pagination}
+// @Failure      500  {object}  response.Response
+// @Router /property/page [post]
+func (h Property) Page(c echo.Context) error {
+	var err error
+
+	loginUser, err := getUserLoginInfo(c)
+	if err != nil {
+		errorInternal(c, err)
+	}
+
+	req := new(request.PageProperty)
+	if err = c.Bind(req); err != nil {
+		errorInternal(c, err)
+	}
+
+	if err = c.Validate(req); err != nil {
+		return response.Error(http.StatusBadRequest, "error validation", response.ValidationError(err)).SendJSON(c)
+	}
+
+	err, cnt, list := getPageProperty(req, loginUser)
+	if err != nil {
+		errorInternal(c, err)
+	}
+
+	return response.Success(http.StatusOK, "success", response.PayloadPagination(req, list, cnt)).SendJSON(c)
+}
+
+func getPageProperty(req *request.PageProperty, loginUser UserLogin) (error, int64, response.PageProperty) {
+	var err error
+	var cnt int64
+	var res response.PageProperty
+
+	conn, closeConn := db.GetConnection()
+	defer closeConn()
+
+	err = conn.Model(&res).
+		Where("company_id = ? ", loginUser.CompanyID).
+		Where("name LIKE ? ", "%"+req.Name+"%").
+		Where("delete_dt IS NULL").
+		Count(&cnt).Error
+	if err != nil {
+		return err, cnt, res
+	}
+
+	// get data
+	if req.GetPage() < 1 {
+		req.SetPage(1)
+	}
+
+	offsite := 0
+	if req.GetPage() > 1 {
+		offsite = (req.GetPage() - 1) * req.GetLimit()
+	}
+
+	err = conn.Where("company_id = ? ", loginUser.CompanyID).
+		Where("name LIKE ? ", "%"+req.Name+"%").
+		Where("delete_dt IS NULL").
+		Offset(offsite).
+		Limit(req.GetLimit()).
+		Find(&res).Error
+	if err != nil {
+		return err, cnt, res
+	}
+
+	return err, cnt, res
+}
+
+// List Property
+// @Summary List Property
+// @Tags Property
+// @Accept json
+// @Produce json
+// @Param req body request.ListProperty true "payload"
+// @Success      200  {object}	response.Response{payload=[]response.List}
+// @Failure      500  {object}  response.Response
+// @Router /property/list [post]
+func (h Property) List(c echo.Context) error {
+	var err error
+
+	req := new(request.ListProperty)
+	if err = c.Bind(req); err != nil {
+		errorInternal(c, err)
+	}
+
+	if err = c.Validate(req); err != nil {
+		return response.Error(http.StatusBadRequest, "error validation", response.ValidationError(err)).SendJSON(c)
+	}
+
+	err, list := getListProperty(req)
+	if err != nil {
+		errorInternal(c, err)
+	}
+
+	return response.Success(http.StatusOK, "success", list).SendJSON(c)
+}
+
+func getListProperty(req *request.ListProperty) (error, []response.List) {
+	var err error
+	var res []response.List
+	var data []model.PropertyView
+
+	conn, closeConn := db.GetConnection()
+	defer closeConn()
+
+	if req.CompanyID == "" {
+		err = conn.Where("name LIKE ? ", "%"+req.Name+"%").
+			Where("description LIKE ? ", "%"+req.Description+"%").
+			Where("delete_dt IS NULL").
+			Find(&data).Error
+	} else {
+		err = conn.Where("company_id = ? ", req.CompanyID).
+			Where("name LIKE ? ", "%"+req.Name+"%").
+			Where("description LIKE ? ", "%"+req.Description+"%").
+			Where("delete_dt IS NULL").
+			Find(&data).Error
+	}
+	if err != nil {
+		return err, res
+	}
+
+	res = make([]response.List, 0)
+	for _, value := range data {
+		add := response.List{
+			Value: value.ID,
+			Label: value.Name,
+		}
+		res = append(res, add)
+	}
+
+	return err, res
+}
+
 // GetById godoc
 // @Tags Property
 // @Summary To do get a user
@@ -52,7 +192,7 @@ func (h Property) GetById(c echo.Context) error {
 
 // Create godoc
 // @Tags Property
-// @Summary To do create new election
+// @Summary To do create new property
 // @Security BearerAuth
 // @Accept json
 // @Produce json

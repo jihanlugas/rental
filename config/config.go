@@ -34,6 +34,7 @@ var (
 	CertificateFilePath    string
 	CertificateKeyFilePath string
 	MaxSizeUploadPhotoByte int64
+	DataPerPage            int
 )
 
 func init() {
@@ -84,6 +85,11 @@ func init() {
 	CertificateKeyFilePath = os.Getenv("CERTIFICATE_KEY_FILE_PATH")
 
 	MaxSizeUploadPhotoByte, err = strconv.ParseInt(os.Getenv("MAX_SIZE_UPLOAD_PHOTO_BYTE"), 10, 64)
+	if err != nil {
+		panic(err)
+	}
+
+	DataPerPage, err = strconv.Atoi(os.Getenv("MIN_DATA_PER_PAGE"))
 	if err != nil {
 		panic(err)
 	}

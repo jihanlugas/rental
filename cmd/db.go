@@ -281,7 +281,7 @@ func seed() {
 	tx.Create(&properties)
 
 	calendars := []model.Calendar{}
-	startDedault := now.Add(-96 * time.Hour)
+	startDedault := now.Add(-96 * time.Hour).Truncate(60 * time.Minute)
 	for i := 0; i < 20; i++ {
 		new1 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(2 * time.Hour), EndDt: startDedault.Add(4 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
 		new2 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(6 * time.Hour), EndDt: startDedault.Add(8 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}

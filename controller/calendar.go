@@ -360,7 +360,9 @@ func (h Calendar) Timeline(c echo.Context) error {
 		return response.Error(http.StatusInternalServerError, "error", response.Payload{})
 	}
 
-	err = conn.Where("company_id = ? ", req.CompanyID).Find(&ListProperty).Error
+	err = conn.Where("company_id = ? ", req.CompanyID).
+		Where("delete_dt IS NULL ").
+		Find(&ListProperty).Error
 	if err != nil {
 		return response.Error(http.StatusInternalServerError, "error", response.Payload{})
 	}
@@ -370,7 +372,7 @@ func (h Calendar) Timeline(c echo.Context) error {
 		ListProperty: ListProperty,
 	}
 
-	return response.Success(http.StatusCreated, "success", res).SendJSON(c)
+	return response.Success(http.StatusOK, "success", res).SendJSON(c)
 }
 
 //func (h Calendar) Tes(c echo.Context) error {

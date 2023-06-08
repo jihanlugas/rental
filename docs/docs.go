@@ -54,7 +54,7 @@ const docTemplate = `{
                 "tags": [
                     "Calendar"
                 ],
-                "summary": "To do create new election",
+                "summary": "To do create new calendar event",
                 "parameters": [
                     {
                         "description": "json req body",
@@ -98,7 +98,7 @@ const docTemplate = `{
                 "tags": [
                     "Calendar"
                 ],
-                "summary": "To do create new election",
+                "summary": "To do get data timeline",
                 "parameters": [
                     {
                         "description": "json req body",
@@ -450,7 +450,7 @@ const docTemplate = `{
                 "tags": [
                     "Property"
                 ],
-                "summary": "To do create new election",
+                "summary": "To do create new property",
                 "parameters": [
                     {
                         "description": "json req body",
@@ -467,6 +467,116 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/property/list": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Property"
+                ],
+                "summary": "List Property",
+                "parameters": [
+                    {
+                        "description": "payload",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.ListProperty"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "payload": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.List"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/property/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Property"
+                ],
+                "summary": "Page Property",
+                "parameters": [
+                    {
+                        "description": "payload",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.PageProperty"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "payload": {
+                                            "$ref": "#/definitions/response.Pagination"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
@@ -780,15 +890,51 @@ const docTemplate = `{
         "request.CreateProperty": {
             "type": "object",
             "required": [
-                "descriptionId",
+                "description",
                 "name"
             ],
             "properties": {
-                "descriptionId": {
+                "description": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "request.ListProperty": {
+            "type": "object",
+            "properties": {
+                "companyId": {
+                    "type": "string",
+                    "maxLength": 200
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 200
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 200
+                }
+            }
+        },
+        "request.PageProperty": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 200
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 200
+                },
+                "page": {
+                    "type": "integer"
                 }
             }
         },
@@ -868,15 +1014,49 @@ const docTemplate = `{
         "request.UpdateProperty": {
             "type": "object",
             "required": [
-                "descriptionId",
+                "description",
                 "name"
             ],
             "properties": {
-                "descriptionId": {
+                "description": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "response.List": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.Pagination": {
+            "type": "object",
+            "properties": {
+                "dataPerPage": {
+                    "type": "integer"
+                },
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "totalData": {
+                    "type": "integer"
+                },
+                "totalPage": {
+                    "type": "integer"
                 }
             }
         },

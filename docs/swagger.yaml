@@ -89,13 +89,38 @@ definitions:
     type: object
   request.CreateProperty:
     properties:
-      descriptionId:
+      description:
         type: string
       name:
         type: string
     required:
-    - descriptionId
+    - description
     - name
+    type: object
+  request.ListProperty:
+    properties:
+      companyId:
+        maxLength: 200
+        type: string
+      description:
+        maxLength: 200
+        type: string
+      name:
+        maxLength: 200
+        type: string
+    type: object
+  request.PageProperty:
+    properties:
+      description:
+        maxLength: 200
+        type: string
+      limit:
+        type: integer
+      name:
+        maxLength: 200
+        type: string
+      page:
+        type: integer
     type: object
   request.Signin:
     properties:
@@ -149,13 +174,35 @@ definitions:
     type: object
   request.UpdateProperty:
     properties:
-      descriptionId:
+      description:
         type: string
       name:
         type: string
     required:
-    - descriptionId
+    - description
     - name
+    type: object
+  response.List:
+    properties:
+      label:
+        type: string
+      value:
+        type: string
+    type: object
+  response.Pagination:
+    properties:
+      dataPerPage:
+        type: integer
+      list:
+        items:
+          type: object
+        type: array
+      page:
+        type: integer
+      totalData:
+        type: integer
+      totalPage:
+        type: integer
     type: object
   response.Response:
     properties:
@@ -224,7 +271,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
-      summary: To do create new election
+      summary: To do create new calendar event
       tags:
       - Calendar
   /calendar/{id}:
@@ -336,7 +383,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
-      summary: To do create new election
+      summary: To do get data timeline
       tags:
       - Calendar
   /company:
@@ -470,7 +517,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
-      summary: To do create new election
+      summary: To do create new property
       tags:
       - Property
   /property/{id}:
@@ -551,6 +598,70 @@ paths:
       security:
       - BearerAuth: []
       summary: To do update a property
+      tags:
+      - Property
+  /property/list:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: payload
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/request.ListProperty'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                payload:
+                  items:
+                    $ref: '#/definitions/response.List'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: List Property
+      tags:
+      - Property
+  /property/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: payload
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/request.PageProperty'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                payload:
+                  $ref: '#/definitions/response.Pagination'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Page Property
       tags:
       - Property
   /sign-in:
