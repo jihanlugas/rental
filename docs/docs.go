@@ -149,7 +149,7 @@ const docTemplate = `{
                 "tags": [
                     "Calendar"
                 ],
-                "summary": "To do get a user",
+                "summary": "To do get a calendar",
                 "parameters": [
                     {
                         "type": "string",
@@ -345,7 +345,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "payload": {
+                                            "$ref": "#/definitions/response.Company"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
@@ -625,7 +637,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "payload": {
+                                            "$ref": "#/definitions/response.Property"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
@@ -764,6 +788,55 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "To do get a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "payload": {
+                                            "$ref": "#/definitions/response.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -801,6 +874,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "propertyId": {
+                    "type": "string"
+                },
+                "propertyName": {
                     "type": "string"
                 },
                 "startDt": {
@@ -1074,6 +1150,9 @@ const docTemplate = `{
                 "propertyId": {
                     "type": "string"
                 },
+                "propertyName": {
+                    "type": "string"
+                },
                 "startDt": {
                     "type": "string"
                 },
@@ -1084,6 +1163,47 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updateName": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.Company": {
+            "type": "object",
+            "properties": {
+                "createBy": {
+                    "type": "string"
+                },
+                "createDt": {
+                    "type": "string"
+                },
+                "createName": {
+                    "type": "string"
+                },
+                "deleteBy": {
+                    "type": "string"
+                },
+                "deleteDt": {
+                    "type": "string"
+                },
+                "deleteName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "string"
+                },
+                "updateDt": {
+                    "type": "string"
+                },
+                "updateName": {
+                    "type": "string"
+                },
+                "userId": {
                     "type": "string"
                 }
             }
@@ -1122,6 +1242,50 @@ const docTemplate = `{
                 }
             }
         },
+        "response.Property": {
+            "type": "object",
+            "properties": {
+                "companyId": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "string"
+                },
+                "createDt": {
+                    "type": "string"
+                },
+                "createName": {
+                    "type": "string"
+                },
+                "deleteBy": {
+                    "type": "string"
+                },
+                "deleteDt": {
+                    "type": "string"
+                },
+                "deleteName": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "string"
+                },
+                "updateDt": {
+                    "type": "string"
+                },
+                "updateName": {
+                    "type": "string"
+                }
+            }
+        },
         "response.Response": {
             "type": "object",
             "properties": {
@@ -1153,6 +1317,71 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/model.PropertyView"
                     }
+                }
+            }
+        },
+        "response.User": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                },
+                "createBy": {
+                    "type": "string"
+                },
+                "createDt": {
+                    "type": "string"
+                },
+                "createName": {
+                    "type": "string"
+                },
+                "deleteBy": {
+                    "type": "string"
+                },
+                "deleteDt": {
+                    "type": "string"
+                },
+                "deleteName": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "fullname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastLoginDt": {
+                    "type": "string"
+                },
+                "noHp": {
+                    "type": "string"
+                },
+                "passVersion": {
+                    "type": "integer"
+                },
+                "photoId": {
+                    "type": "string"
+                },
+                "photoUrl": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "string"
+                },
+                "updateDt": {
+                    "type": "string"
+                },
+                "updateName": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }

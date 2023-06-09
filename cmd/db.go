@@ -132,7 +132,8 @@ func up() {
 		Joins("left join users u3 on u3.id = properties.delete_by")
 
 	vCalendar := conn.Model(&model.Calendar{}).
-		Select("calendars.*, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
+		Select("calendars.*, properties.name as property_name, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
+		Joins("join properties on properties.id = calendars.property_id").
 		Joins("left join users u1 on u1.id = calendars.create_by").
 		Joins("left join users u2 on u2.id = calendars.update_by").
 		Joins("left join users u3 on u3.id = calendars.delete_by")

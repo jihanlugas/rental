@@ -7,9 +7,6 @@ import (
 type User model.UserView
 type Users []model.UserView
 
-type Company model.CompanyView
-type Companies []model.CompanyView
-
 type Companysetting model.CompanysettingView
 type Companysettings []model.CompanysettingView
 

@@ -21,6 +21,15 @@ func UserComposer() User {
 	return User{}
 }
 
+// GetById
+// @Tags User
+// @Summary To do get a user
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Success      200  {object}	response.Response{payload=response.User}
+// @Failure      500  {object}  response.Response
+// @Router /user/{id} [get]
 func (h User) GetById(c echo.Context) error {
 	var err error
 	var user model.UserView
@@ -41,7 +50,9 @@ func (h User) GetById(c echo.Context) error {
 		errorInternal(c, err)
 	}
 
-	return response.Success(http.StatusOK, "success", user).SendJSON(c)
+	res := response.User(user)
+
+	return response.Success(http.StatusOK, "success", res).SendJSON(c)
 }
 
 // SignIn Sign In user

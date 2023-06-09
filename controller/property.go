@@ -164,7 +164,7 @@ func getListProperty(req *request.ListProperty) (error, []response.List) {
 // @Accept json
 // @Produce json
 // @Param id path string true "Property ID"
-// @Success      200  {object}	response.Response
+// @Success      200  {object}	response.Response{payload=response.Property}
 // @Failure      500  {object}  response.Response
 // @Router /property/{id} [get]
 func (h Property) GetById(c echo.Context) error {
@@ -187,7 +187,9 @@ func (h Property) GetById(c echo.Context) error {
 		errorInternal(c, err)
 	}
 
-	return response.Success(http.StatusOK, "success", property).SendJSON(c)
+	res := response.Property(property)
+
+	return response.Success(http.StatusOK, "success", res).SendJSON(c)
 }
 
 // Create godoc

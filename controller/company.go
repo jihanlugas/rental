@@ -24,7 +24,7 @@ func CompanyComposer() Company {
 // @Accept json
 // @Produce json
 // @Param id path string true "Company ID"
-// @Success      200  {object}	response.Response
+// @Success      200  {object}	response.Response{payload=response.Company}
 // @Failure      500  {object}  response.Response
 // @Router /company/{id} [get]
 func (h Company) GetById(c echo.Context) error {
@@ -47,7 +47,9 @@ func (h Company) GetById(c echo.Context) error {
 		errorInternal(c, err)
 	}
 
-	return response.Success(http.StatusOK, "success", company).SendJSON(c)
+	res := response.Company(company)
+
+	return response.Success(http.StatusOK, "success", res).SendJSON(c)
 }
 
 // Create godoc

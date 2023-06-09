@@ -130,7 +130,7 @@ func (h Calendar) WsCalendar(c echo.Context) error {
 
 // GetById godoc
 // @Tags Calendar
-// @Summary To do get a user
+// @Summary To do get a calendar
 // @Accept json
 // @Produce json
 // @Param id path string true "Calendar ID"
@@ -139,7 +139,7 @@ func (h Calendar) WsCalendar(c echo.Context) error {
 // @Router /calendar/{id} [get]
 func (h Calendar) GetById(c echo.Context) error {
 	var err error
-	var calendar response.Calendar
+	var calendar model.CalendarView
 
 	conn, closeConn := db.GetConnection()
 	defer closeConn()
@@ -157,7 +157,9 @@ func (h Calendar) GetById(c echo.Context) error {
 		errorInternal(c, err)
 	}
 
-	return response.Success(http.StatusOK, "success", calendar).SendJSON(c)
+	res := response.Calendar(calendar)
+
+	return response.Success(http.StatusOK, "success", res).SendJSON(c)
 }
 
 // Create godoc
