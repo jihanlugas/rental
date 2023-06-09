@@ -134,12 +134,12 @@ func (h Calendar) WsCalendar(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param id path string true "Calendar ID"
-// @Success      200  {object}	response.Response
+// @Success      200  {object}	response.Response{payload=response.Calendar}
 // @Failure      500  {object}  response.Response
 // @Router /calendar/{id} [get]
 func (h Calendar) GetById(c echo.Context) error {
 	var err error
-	var calendar model.CalendarView
+	var calendar response.Calendar
 
 	conn, closeConn := db.GetConnection()
 	defer closeConn()

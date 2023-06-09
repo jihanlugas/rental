@@ -182,6 +182,39 @@ definitions:
     - description
     - name
     type: object
+  response.Calendar:
+    properties:
+      companyId:
+        type: string
+      createBy:
+        type: string
+      createDt:
+        type: string
+      createName:
+        type: string
+      deleteBy:
+        type: string
+      deleteDt:
+        type: string
+      deleteName:
+        type: string
+      endDt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      propertyId:
+        type: string
+      startDt:
+        type: string
+      updateBy:
+        type: string
+      updateDt:
+        type: string
+      updateName:
+        type: string
+    type: object
   response.List:
     properties:
       label:
@@ -315,7 +348,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                payload:
+                  $ref: '#/definitions/response.Calendar'
+              type: object
         "500":
           description: Internal Server Error
           schema:

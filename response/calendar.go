@@ -11,3 +11,5 @@ type Timeline struct {
 	ListCalendar []model.CalendarView `json:"calendars"`
 	ListProperty []model.PropertyView `json:"properties"`
 }
+
+type Calendar model.CalendarView

@@ -163,7 +163,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "payload": {
+                                            "$ref": "#/definitions/response.Calendar"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
@@ -1022,6 +1034,56 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.Calendar": {
+            "type": "object",
+            "properties": {
+                "companyId": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "string"
+                },
+                "createDt": {
+                    "type": "string"
+                },
+                "createName": {
+                    "type": "string"
+                },
+                "deleteBy": {
+                    "type": "string"
+                },
+                "deleteDt": {
+                    "type": "string"
+                },
+                "deleteName": {
+                    "type": "string"
+                },
+                "endDt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "propertyId": {
+                    "type": "string"
+                },
+                "startDt": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "string"
+                },
+                "updateDt": {
+                    "type": "string"
+                },
+                "updateName": {
                     "type": "string"
                 }
             }
