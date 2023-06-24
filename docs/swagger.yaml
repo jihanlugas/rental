@@ -38,6 +38,8 @@ definitions:
     properties:
       companyId:
         type: string
+      companyName:
+        type: string
       createBy:
         type: string
       createDt:
@@ -89,6 +91,16 @@ definitions:
     - name
     - userId
     type: object
+  request.CreateItem:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - description
+    - name
+    type: object
   request.CreateProperty:
     properties:
       description:
@@ -98,6 +110,18 @@ definitions:
     required:
     - description
     - name
+    type: object
+  request.ListItem:
+    properties:
+      companyId:
+        maxLength: 200
+        type: string
+      description:
+        maxLength: 200
+        type: string
+      name:
+        maxLength: 200
+        type: string
     type: object
   request.ListProperty:
     properties:
@@ -110,6 +134,19 @@ definitions:
       name:
         maxLength: 200
         type: string
+    type: object
+  request.PageItem:
+    properties:
+      description:
+        maxLength: 200
+        type: string
+      limit:
+        type: integer
+      name:
+        maxLength: 200
+        type: string
+      page:
+        type: integer
     type: object
   request.PageProperty:
     properties:
@@ -173,6 +210,16 @@ definitions:
     required:
     - name
     - userId
+    type: object
+  request.UpdateItem:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - description
+    - name
     type: object
   request.UpdateProperty:
     properties:
@@ -246,6 +293,37 @@ definitions:
       userId:
         type: string
     type: object
+  response.Item:
+    properties:
+      companyId:
+        type: string
+      companyName:
+        type: string
+      createBy:
+        type: string
+      createDt:
+        type: string
+      createName:
+        type: string
+      deleteBy:
+        type: string
+      deleteDt:
+        type: string
+      deleteName:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updateBy:
+        type: string
+      updateDt:
+        type: string
+      updateName:
+        type: string
+    type: object
   response.List:
     properties:
       label:
@@ -271,6 +349,8 @@ definitions:
   response.Property:
     properties:
       companyId:
+        type: string
+      companyName:
         type: string
       createBy:
         type: string
@@ -639,6 +719,182 @@ paths:
       summary: To do update a company
       tags:
       - Company
+  /item:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: json req body
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateItem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: To do create new item
+      tags:
+      - Item
+  /item/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete Item
+      tags:
+      - Item
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                payload:
+                  $ref: '#/definitions/response.Item'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: To do get a user
+      tags:
+      - Item
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: json req body
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateItem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: To do update a item
+      tags:
+      - Item
+  /item/list:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: payload
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/request.ListItem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                payload:
+                  items:
+                    $ref: '#/definitions/response.List'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: List Item
+      tags:
+      - Item
+  /item/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: payload
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/request.PageItem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                payload:
+                  $ref: '#/definitions/response.Pagination'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Page Item
+      tags:
+      - Item
   /property:
     post:
       consumes:

@@ -84,6 +84,7 @@ type PropertyView struct {
 	ID          string     `json:"id"`
 	CompanyID   string     `json:"companyId"`
 	Name        string     `json:"name"`
+	CompanyName string     `json:"companyName"`
 	Description string     `json:"description"`
 	CreateBy    string     `json:"createBy"`
 	CreateDt    time.Time  `json:"createDt"`
@@ -98,6 +99,27 @@ type PropertyView struct {
 
 func (PropertyView) TableName() string {
 	return "properties_view"
+}
+
+type ItemView struct {
+	ID          string     `json:"id"`
+	CompanyID   string     `json:"companyId"`
+	Name        string     `json:"name"`
+	CompanyName string     `json:"companyName"`
+	Description string     `json:"description"`
+	CreateBy    string     `json:"createBy"`
+	CreateDt    time.Time  `json:"createDt"`
+	UpdateBy    string     `json:"updateBy"`
+	UpdateDt    time.Time  `json:"updateDt"`
+	DeleteBy    string     `json:"deleteBy"`
+	DeleteDt    *time.Time `json:"deleteDt"`
+	CreateName  string     `json:"createName"`
+	UpdateName  string     `json:"updateName"`
+	DeleteName  string     `json:"deleteName"`
+}
+
+func (ItemView) TableName() string {
+	return "items_view"
 }
 
 type CalendarView struct {

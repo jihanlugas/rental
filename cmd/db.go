@@ -93,6 +93,10 @@ func up() {
 	if err != nil {
 		panic(err)
 	}
+	err = conn.Migrator().AutoMigrate(&model.Item{})
+	if err != nil {
+		panic(err)
+	}
 	err = conn.Migrator().AutoMigrate(&model.Calendar{})
 	if err != nil {
 		panic(err)
@@ -125,11 +129,18 @@ func up() {
 		Joins("left join users u3 on u3.id = usercompanies.delete_by")
 
 	vProperty := conn.Model(&model.Property{}).
-		Select("properties.*, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
+		Select("properties.*, companies.name as company_name, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
 		Joins("join companies on companies.id = properties.company_id ").
 		Joins("left join users u1 on u1.id = properties.create_by").
 		Joins("left join users u2 on u2.id = properties.update_by").
 		Joins("left join users u3 on u3.id = properties.delete_by")
+
+	vItem := conn.Model(&model.Item{}).
+		Select("items.*, companies.name as company_name, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
+		Joins("join companies on companies.id = items.company_id ").
+		Joins("left join users u1 on u1.id = items.create_by").
+		Joins("left join users u2 on u2.id = items.update_by").
+		Joins("left join users u3 on u3.id = items.delete_by")
 
 	vCalendar := conn.Model(&model.Calendar{}).
 		Select("calendars.*, properties.name as property_name, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
@@ -178,6 +189,14 @@ func up() {
 		panic(err)
 	}
 
+	err = conn.Migrator().CreateView("items_view", gorm.ViewOption{
+		Replace: true,
+		Query:   vItem,
+	})
+	if err != nil {
+		panic(err)
+	}
+
 	err = conn.Migrator().CreateView("calendars_view", gorm.ViewOption{
 		Replace: true,
 		Query:   vCalendar,
@@ -213,6 +232,10 @@ func down() {
 	if err != nil {
 		panic(err)
 	}
+	err = conn.Migrator().DropView("items_view")
+	if err != nil {
+		panic(err)
+	}
 	err = conn.Migrator().DropView("calendars_view")
 	if err != nil {
 		panic(err)
@@ -236,6 +259,10 @@ func down() {
 		panic(err)
 	}
 	err = conn.Migrator().DropTable(&model.Property{})
+	if err != nil {
+		panic(err)
+	}
+	err = conn.Migrator().DropTable(&model.Item{})
 	if err != nil {
 		panic(err)
 	}
@@ -284,11 +311,11 @@ func seed() {
 	calendars := []model.Calendar{}
 	startDedault := now.Add(-96 * time.Hour).Truncate(60 * time.Minute)
 	for i := 0; i < 20; i++ {
-		new1 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(2 * time.Hour), EndDt: startDedault.Add(4 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
-		new2 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(6 * time.Hour), EndDt: startDedault.Add(8 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
-		new3 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: fmt.Sprintf("Tes data %d", i), StartDt: startDedault.Add(10 * time.Hour), EndDt: startDedault.Add(12 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
+		new1 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: fmt.Sprintf("Tes data %d", (i*3)+1), StartDt: startDedault.Add(2 * time.Hour), EndDt: startDedault.Add(4 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
+		new2 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: fmt.Sprintf("Tes data %d", (i*3)+2), StartDt: startDedault.Add(6 * time.Hour), EndDt: startDedault.Add(8 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
+		new3 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: fmt.Sprintf("Tes data %d", (i*3)+3), StartDt: startDedault.Add(10 * time.Hour), EndDt: startDedault.Add(12 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
 		calendars = append(calendars, new1, new2, new3)
-		startDedault = startDedault.Add(16 * time.Hour)
+		startDedault = startDedault.Add(12 * time.Hour)
 	}
 	tx.Create(&calendars)
 

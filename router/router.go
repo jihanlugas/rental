@@ -25,6 +25,7 @@ func Init() *echo.Echo {
 	userController := controller.UserComposer()
 	companyController := controller.CompanyComposer()
 	propertyController := controller.PropertyComposer()
+	itemController := controller.ItemComposer()
 
 	router.GET("/swg/*", echoSwagger.WrapHandler)
 
@@ -58,6 +59,14 @@ func Init() *echo.Echo {
 	property.POST("", propertyController.Create, checkToken)
 	property.PUT("/:id", propertyController.Update, checkToken)
 	property.DELETE("/:id", propertyController.Delete, checkToken)
+
+	item := router.Group("/item")
+	item.GET("/:id", itemController.GetById)
+	item.POST("/page", itemController.Page, checkToken)
+	item.POST("/list", itemController.List)
+	item.POST("", itemController.Create, checkToken)
+	item.PUT("/:id", itemController.Update, checkToken)
+	item.DELETE("/:id", itemController.Delete, checkToken)
 
 	return router
 }
