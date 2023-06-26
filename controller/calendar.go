@@ -162,6 +162,52 @@ func (h Calendar) GetById(c echo.Context) error {
 	return response.Success(http.StatusOK, "success", res).SendJSON(c)
 }
 
+// GetDetailById godoc
+// @Tags Calendar
+// @Summary To do get a calendar detail
+// @Accept json
+// @Produce json
+// @Param id path string true "Calendar ID"
+// @Success      200  {object}	response.Response{payload=response.CalendarDetail}
+// @Failure      500  {object}  response.Response
+// @Router /calendar/detail/{id} [get]
+func (h Calendar) GetDetailById(c echo.Context) error {
+	var err error
+	var calendar model.CalendarView
+	var calendarItems []model.CalendaritemView
+
+	conn, closeConn := db.GetConnection()
+	defer closeConn()
+
+	ID := c.Param("id")
+	if ID == "" {
+		return response.Error(http.StatusBadRequest, "data not found", response.Payload{}).SendJSON(c)
+	}
+
+	err = conn.Where("id = ? ", ID).First(&calendar).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.Error(http.StatusBadRequest, "data not found", response.Payload{}).SendJSON(c)
+		}
+		errorInternal(c, err)
+	}
+
+	err = conn.Where("calendar_id = ? ", ID).Find(&calendarItems).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.Error(http.StatusBadRequest, "data not found", response.Payload{}).SendJSON(c)
+		}
+		errorInternal(c, err)
+	}
+
+	res := response.CalendarDetail{
+		Calendar:     calendar,
+		Calendaritem: calendarItems,
+	}
+
+	return response.Success(http.StatusOK, "success", res).SendJSON(c)
+}
+
 // Create godoc
 // @Tags Calendar
 // @Summary To do create new calendar event

@@ -46,6 +46,7 @@ func Init() *echo.Echo {
 
 	calendar := router.Group("/calendar")
 	calendar.GET("/:id", calendarController.GetById)
+	calendar.GET("/detail/:id", calendarController.GetDetailById, checkToken)
 	calendar.POST("", calendarController.Create, checkToken)
 	calendar.PUT("/:id", calendarController.Update, checkToken)
 	calendar.DELETE("/:id", calendarController.Delete, checkToken)

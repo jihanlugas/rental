@@ -359,6 +359,34 @@ func seed() {
 	}
 	tx.Create(&calendars)
 
+	calendaritems := []model.Calendaritem{
+		{
+			CompanyID:  companies[0].ID,
+			PropertyID: properties[0].ID,
+			CalendarID: calendars[27].ID,
+			ItemID:     items[0].ID,
+			CreateBy:   users[0].ID,
+			UpdateBy:   users[0].ID,
+		},
+		{
+			CompanyID:  companies[0].ID,
+			PropertyID: properties[0].ID,
+			CalendarID: calendars[27].ID,
+			ItemID:     items[1].ID,
+			CreateBy:   users[0].ID,
+			UpdateBy:   users[0].ID,
+		},
+		{
+			CompanyID:  companies[0].ID,
+			PropertyID: properties[0].ID,
+			CalendarID: calendars[27].ID,
+			ItemID:     items[2].ID,
+			CreateBy:   users[0].ID,
+			UpdateBy:   users[0].ID,
+		},
+	}
+	tx.Create(&calendaritems)
+
 	usercompanies := []model.Usercompany{
 		{UserID: users[0].ID, CompanyID: companies[0].ID, DefaultCompany: true, CreateBy: users[0].ID, CreateDt: now, UpdateBy: users[0].ID, UpdateDt: now},
 	}

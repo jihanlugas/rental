@@ -82,6 +82,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/calendar/detail/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Calendar"
+                ],
+                "summary": "To do get a calendar detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Calendar ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "payload": {
+                                            "$ref": "#/definitions/response.CalendarDetail"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/calendar/timeline": {
             "post": {
                 "security": [
@@ -1185,6 +1234,65 @@ const docTemplate = `{
                 }
             }
         },
+        "model.CalendaritemView": {
+            "type": "object",
+            "properties": {
+                "calendarId": {
+                    "type": "string"
+                },
+                "calendarName": {
+                    "type": "string"
+                },
+                "companyId": {
+                    "type": "string"
+                },
+                "companyName": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "string"
+                },
+                "createDt": {
+                    "type": "string"
+                },
+                "createName": {
+                    "type": "string"
+                },
+                "deleteBy": {
+                    "type": "string"
+                },
+                "deleteDt": {
+                    "type": "string"
+                },
+                "deleteName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "itemId": {
+                    "type": "string"
+                },
+                "itemName": {
+                    "type": "string"
+                },
+                "propertyId": {
+                    "type": "string"
+                },
+                "propertyName": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "string"
+                },
+                "updateDt": {
+                    "type": "string"
+                },
+                "updateName": {
+                    "type": "string"
+                }
+            }
+        },
         "model.PropertyView": {
             "type": "object",
             "properties": {
@@ -1525,6 +1633,20 @@ const docTemplate = `{
                 },
                 "updateName": {
                     "type": "string"
+                }
+            }
+        },
+        "response.CalendarDetail": {
+            "type": "object",
+            "properties": {
+                "calendar": {
+                    "$ref": "#/definitions/model.CalendarView"
+                },
+                "calendaritems": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.CalendaritemView"
+                    }
                 }
             }
         },

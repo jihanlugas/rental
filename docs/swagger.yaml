@@ -34,6 +34,45 @@ definitions:
       updateName:
         type: string
     type: object
+  model.CalendaritemView:
+    properties:
+      calendarId:
+        type: string
+      calendarName:
+        type: string
+      companyId:
+        type: string
+      companyName:
+        type: string
+      createBy:
+        type: string
+      createDt:
+        type: string
+      createName:
+        type: string
+      deleteBy:
+        type: string
+      deleteDt:
+        type: string
+      deleteName:
+        type: string
+      id:
+        type: string
+      itemId:
+        type: string
+      itemName:
+        type: string
+      propertyId:
+        type: string
+      propertyName:
+        type: string
+      updateBy:
+        type: string
+      updateDt:
+        type: string
+      updateName:
+        type: string
+    type: object
   model.PropertyView:
     properties:
       companyId:
@@ -265,6 +304,15 @@ definitions:
         type: string
       updateName:
         type: string
+    type: object
+  response.CalendarDetail:
+    properties:
+      calendar:
+        $ref: '#/definitions/model.CalendarView'
+      calendaritems:
+        items:
+          $ref: '#/definitions/model.CalendaritemView'
+        type: array
     type: object
   response.Company:
     properties:
@@ -575,6 +623,35 @@ paths:
       security:
       - BearerAuth: []
       summary: To do update a calendar
+      tags:
+      - Calendar
+  /calendar/detail/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Calendar ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                payload:
+                  $ref: '#/definitions/response.CalendarDetail'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: To do get a calendar detail
       tags:
       - Calendar
   /calendar/timeline:
