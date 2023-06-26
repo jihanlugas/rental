@@ -107,6 +107,7 @@ type ItemView struct {
 	Name        string     `json:"name"`
 	CompanyName string     `json:"companyName"`
 	Description string     `json:"description"`
+	Price       int64      `json:"price"`
 	CreateBy    string     `json:"createBy"`
 	CreateDt    time.Time  `json:"createDt"`
 	UpdateBy    string     `json:"updateBy"`
@@ -143,4 +144,29 @@ type CalendarView struct {
 
 func (CalendarView) TableName() string {
 	return "calendars_view"
+}
+
+type CalendaritemView struct {
+	ID           string     `json:"id"`
+	CompanyID    string     `json:"companyId"`
+	PropertyID   string     `json:"propertyId"`
+	CalendarID   string     `json:"calendarId"`
+	ItemID       string     `json:"itemId"`
+	CreateBy     string     `json:"createBy"`
+	CreateDt     time.Time  `json:"createDt"`
+	UpdateBy     string     `json:"updateBy"`
+	UpdateDt     time.Time  `json:"updateDt"`
+	DeleteBy     string     `json:"deleteBy"`
+	DeleteDt     *time.Time `json:"deleteDt"`
+	CompanyName  string     `json:"companyName"`
+	PropertyName string     `json:"propertyName"`
+	CalendarName string     `json:"calendarName"`
+	ItemName     string     `json:"itemName"`
+	CreateName   string     `json:"createName"`
+	UpdateName   string     `json:"updateName"`
+	DeleteName   string     `json:"deleteName"`
+}
+
+func (CalendaritemView) TableName() string {
+	return "calendaritems_view"
 }

@@ -1605,6 +1605,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "price": {
+                    "type": "integer"
+                },
                 "updateBy": {
                     "type": "string"
                 },

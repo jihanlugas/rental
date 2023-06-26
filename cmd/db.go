@@ -101,6 +101,10 @@ func up() {
 	if err != nil {
 		panic(err)
 	}
+	err = conn.Migrator().AutoMigrate(&model.Calendaritem{})
+	if err != nil {
+		panic(err)
+	}
 
 	// view
 	vUser := conn.Model(&model.User{}).
@@ -148,6 +152,16 @@ func up() {
 		Joins("left join users u1 on u1.id = calendars.create_by").
 		Joins("left join users u2 on u2.id = calendars.update_by").
 		Joins("left join users u3 on u3.id = calendars.delete_by")
+
+	vCalendaritem := conn.Model(&model.Calendaritem{}).
+		Select("calendaritems.*, companies.name as company_name, properties.name as property_name, calendars.name as calendar_name, items.name as item_name, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
+		Joins("join companies on companies.id = calendaritems.company_id").
+		Joins("join properties on properties.id = calendaritems.property_id").
+		Joins("join calendars on calendars.id = calendaritems.calendar_id").
+		Joins("join items on items.id = calendaritems.item_id").
+		Joins("left join users u1 on u1.id = calendaritems.create_by").
+		Joins("left join users u2 on u2.id = calendaritems.update_by").
+		Joins("left join users u3 on u3.id = calendaritems.delete_by")
 
 	err = conn.Migrator().CreateView("users_view", gorm.ViewOption{
 		Replace: true,
@@ -204,6 +218,14 @@ func up() {
 	if err != nil {
 		panic(err)
 	}
+
+	err = conn.Migrator().CreateView("calendaritems_view", gorm.ViewOption{
+		Replace: true,
+		Query:   vCalendaritem,
+	})
+	if err != nil {
+		panic(err)
+	}
 }
 
 func down() {
@@ -240,6 +262,10 @@ func down() {
 	if err != nil {
 		panic(err)
 	}
+	err = conn.Migrator().DropView("calendaritems_view")
+	if err != nil {
+		panic(err)
+	}
 
 	// table
 	err = conn.Migrator().DropTable(&model.User{})
@@ -270,6 +296,10 @@ func down() {
 	if err != nil {
 		panic(err)
 	}
+	err = conn.Migrator().DropTable(&model.Calendaritem{})
+	if err != nil {
+		panic(err)
+	}
 
 }
 
@@ -292,7 +322,7 @@ func seed() {
 	tx.Create(&users)
 
 	companies := []model.Company{
-		{UserID: users[0].ID, Name: "Company 1", CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{UserID: users[0].ID, Name: "Company 1", CreateBy: users[0].ID, CreateDt: now, UpdateBy: users[0].ID, UpdateDt: now},
 	}
 	tx.Create(&companies)
 
@@ -302,25 +332,35 @@ func seed() {
 	tx.Create(&companysettings)
 
 	properties := []model.Property{
-		{CompanyID: companies[0].ID, Name: "Lapangan 1", Description: "Description"},
-		{CompanyID: companies[0].ID, Name: "Lapangan 2", Description: "Description"},
-		{CompanyID: companies[0].ID, Name: "Lapangan 3", Description: "Description"},
+		{CompanyID: companies[0].ID, Name: "Lapangan 1", Description: "Description", CreateBy: users[0].ID, UpdateBy: users[0].ID},
+		{CompanyID: companies[0].ID, Name: "Lapangan 2", Description: "Description", CreateBy: users[0].ID, UpdateBy: users[0].ID},
+		{CompanyID: companies[0].ID, Name: "Lapangan 3", Description: "Description", CreateBy: users[0].ID, UpdateBy: users[0].ID},
 	}
 	tx.Create(&properties)
+
+	items := []model.Item{
+		{CompanyID: companies[0].ID, Name: "Item 1", Description: "Description Item 1", Price: 10000, CreateBy: users[0].ID, UpdateBy: users[0].ID},
+		{CompanyID: companies[0].ID, Name: "Item 2", Description: "Description Item 2", Price: 20000, CreateBy: users[0].ID, UpdateBy: users[0].ID},
+		{CompanyID: companies[0].ID, Name: "Item 3", Description: "Description Item 3", Price: 30000, CreateBy: users[0].ID, UpdateBy: users[0].ID},
+		{CompanyID: companies[0].ID, Name: "Item 4", Description: "Description Item 4", Price: 40000, CreateBy: users[0].ID, UpdateBy: users[0].ID},
+		{CompanyID: companies[0].ID, Name: "Item 5", Description: "Description Item 5", Price: 50000, CreateBy: users[0].ID, UpdateBy: users[0].ID},
+		{CompanyID: companies[0].ID, Name: "Item 6", Description: "Description Item 6", Price: 60000, CreateBy: users[0].ID, UpdateBy: users[0].ID},
+	}
+	tx.Create(&items)
 
 	calendars := []model.Calendar{}
 	startDedault := now.Add(-96 * time.Hour).Truncate(60 * time.Minute)
 	for i := 0; i < 20; i++ {
-		new1 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: fmt.Sprintf("Tes data %d", (i*3)+1), StartDt: startDedault.Add(2 * time.Hour), EndDt: startDedault.Add(4 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
-		new2 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: fmt.Sprintf("Tes data %d", (i*3)+2), StartDt: startDedault.Add(6 * time.Hour), EndDt: startDedault.Add(8 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
-		new3 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: fmt.Sprintf("Tes data %d", (i*3)+3), StartDt: startDedault.Add(10 * time.Hour), EndDt: startDedault.Add(12 * time.Hour), Status: 1, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now}
+		new1 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[0].ID, Name: fmt.Sprintf("Tes data %d", (i*3)+1), StartDt: startDedault.Add(2 * time.Hour), EndDt: startDedault.Add(4 * time.Hour), Status: 1, CreateBy: users[0].ID, CreateDt: now, UpdateBy: users[0].ID, UpdateDt: now}
+		new2 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[1].ID, Name: fmt.Sprintf("Tes data %d", (i*3)+2), StartDt: startDedault.Add(6 * time.Hour), EndDt: startDedault.Add(8 * time.Hour), Status: 1, CreateBy: users[0].ID, CreateDt: now, UpdateBy: users[0].ID, UpdateDt: now}
+		new3 := model.Calendar{CompanyID: companies[0].ID, PropertyID: properties[2].ID, Name: fmt.Sprintf("Tes data %d", (i*3)+3), StartDt: startDedault.Add(10 * time.Hour), EndDt: startDedault.Add(12 * time.Hour), Status: 1, CreateBy: users[0].ID, CreateDt: now, UpdateBy: users[0].ID, UpdateDt: now}
 		calendars = append(calendars, new1, new2, new3)
 		startDedault = startDedault.Add(12 * time.Hour)
 	}
 	tx.Create(&calendars)
 
 	usercompanies := []model.Usercompany{
-		{UserID: users[0].ID, CompanyID: companies[0].ID, DefaultCompany: true, CreateBy: "", CreateDt: now, UpdateBy: "", UpdateDt: now},
+		{UserID: users[0].ID, CompanyID: companies[0].ID, DefaultCompany: true, CreateBy: users[0].ID, CreateDt: now, UpdateBy: users[0].ID, UpdateDt: now},
 	}
 	tx.Create(&usercompanies)
 

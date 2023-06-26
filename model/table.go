@@ -73,6 +73,7 @@ type Item struct {
 	CompanyID   string     `gorm:"not null"`
 	Name        string     `gorm:"not null"`
 	Description string     `gorm:"not null"`
+	Price       int64      `gorm:"not null"`
 	CreateBy    string     `gorm:"not null"`
 	CreateDt    time.Time  `gorm:"not null"`
 	UpdateBy    string     `gorm:"not null"`
@@ -89,6 +90,20 @@ type Calendar struct {
 	StartDt    time.Time  `gorm:"not null"`
 	EndDt      time.Time  `gorm:"not null"`
 	Status     int        `gorm:"not null"`
+	CreateBy   string     `gorm:"not null"`
+	CreateDt   time.Time  `gorm:"not null"`
+	UpdateBy   string     `gorm:"not null"`
+	UpdateDt   time.Time  `gorm:"not null"`
+	DeleteBy   string     `gorm:"not null"`
+	DeleteDt   *time.Time `gorm:"null"`
+}
+
+type Calendaritem struct {
+	ID         string     `gorm:"primaryKey"`
+	CompanyID  string     `gorm:"not null"`
+	PropertyID string     `gorm:"not null"`
+	CalendarID string     `gorm:"not null"`
+	ItemID     string     `gorm:"not null"`
 	CreateBy   string     `gorm:"not null"`
 	CreateDt   time.Time  `gorm:"not null"`
 	UpdateBy   string     `gorm:"not null"`
