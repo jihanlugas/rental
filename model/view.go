@@ -152,6 +152,8 @@ type CalendaritemView struct {
 	PropertyID   string     `json:"propertyId"`
 	CalendarID   string     `json:"calendarId"`
 	ItemID       string     `json:"itemId"`
+	Qty          int        `json:"qty"`
+	Price        int        `json:"price"`
 	CreateBy     string     `json:"createBy"`
 	CreateDt     time.Time  `json:"createDt"`
 	UpdateBy     string     `json:"updateBy"`

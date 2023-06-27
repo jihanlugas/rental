@@ -104,6 +104,7 @@ type Calendaritem struct {
 	PropertyID string     `gorm:"not null"`
 	CalendarID string     `gorm:"not null"`
 	ItemID     string     `gorm:"not null"`
+	Qty        int        `gorm:"not null"`
 	CreateBy   string     `gorm:"not null"`
 	CreateDt   time.Time  `gorm:"not null"`
 	UpdateBy   string     `gorm:"not null"`

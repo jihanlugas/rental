@@ -1276,11 +1276,17 @@ const docTemplate = `{
                 "itemName": {
                     "type": "string"
                 },
+                "price": {
+                    "type": "integer"
+                },
                 "propertyId": {
                     "type": "string"
                 },
                 "propertyName": {
                     "type": "string"
+                },
+                "qty": {
+                    "type": "integer"
                 },
                 "updateBy": {
                     "type": "string"

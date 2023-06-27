@@ -8,6 +8,7 @@ import (
 	"github.com/jihanlugas/rental/utils"
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
+	"math/rand"
 	"time"
 )
 
@@ -154,7 +155,7 @@ func up() {
 		Joins("left join users u3 on u3.id = calendars.delete_by")
 
 	vCalendaritem := conn.Model(&model.Calendaritem{}).
-		Select("calendaritems.*, companies.name as company_name, properties.name as property_name, calendars.name as calendar_name, items.name as item_name, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
+		Select("calendaritems.*, companies.name as company_name, properties.name as property_name, calendars.name as calendar_name, items.name as item_name, items.price as price, u1.fullname as create_name, u2.fullname as update_name, u3.fullname as delete_name").
 		Joins("join companies on companies.id = calendaritems.company_id").
 		Joins("join properties on properties.id = calendaritems.property_id").
 		Joins("join calendars on calendars.id = calendaritems.calendar_id").
@@ -365,6 +366,7 @@ func seed() {
 			PropertyID: properties[0].ID,
 			CalendarID: calendars[27].ID,
 			ItemID:     items[0].ID,
+			Qty:        rand.Intn(20) + 1,
 			CreateBy:   users[0].ID,
 			UpdateBy:   users[0].ID,
 		},
@@ -373,6 +375,7 @@ func seed() {
 			PropertyID: properties[0].ID,
 			CalendarID: calendars[27].ID,
 			ItemID:     items[1].ID,
+			Qty:        rand.Intn(20) + 1,
 			CreateBy:   users[0].ID,
 			UpdateBy:   users[0].ID,
 		},
@@ -381,6 +384,7 @@ func seed() {
 			PropertyID: properties[0].ID,
 			CalendarID: calendars[27].ID,
 			ItemID:     items[2].ID,
+			Qty:        rand.Intn(20) + 1,
 			CreateBy:   users[0].ID,
 			UpdateBy:   users[0].ID,
 		},
