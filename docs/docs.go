@@ -1130,6 +1130,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/change-password": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "To do change password user",
+                "parameters": [
+                    {
+                        "description": "json req body",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.ChangePassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/user/{id}": {
             "get": {
                 "consumes": [
@@ -1343,6 +1387,28 @@ const docTemplate = `{
                 },
                 "updateName": {
                     "type": "string"
+                }
+            }
+        },
+        "request.ChangePassword": {
+            "type": "object",
+            "required": [
+                "confirmPasswd",
+                "currentPasswd",
+                "passwd"
+            ],
+            "properties": {
+                "confirmPasswd": {
+                    "type": "string",
+                    "maxLength": 200
+                },
+                "currentPasswd": {
+                    "type": "string",
+                    "maxLength": 200
+                },
+                "passwd": {
+                    "type": "string",
+                    "maxLength": 200
                 }
             }
         },

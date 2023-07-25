@@ -4,7 +4,7 @@ import "time"
 
 type UserView struct {
 	ID          string     `json:"id"`
-	RoleID      string     `json:"role_id"`
+	RoleID      string     `json:"roleId"`
 	Email       string     `json:"email"`
 	Username    string     `json:"username"`
 	NoHp        string     `json:"noHp"`

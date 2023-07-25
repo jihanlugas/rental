@@ -108,6 +108,22 @@ definitions:
       updateName:
         type: string
     type: object
+  request.ChangePassword:
+    properties:
+      confirmPasswd:
+        maxLength: 200
+        type: string
+      currentPasswd:
+        maxLength: 200
+        type: string
+      passwd:
+        maxLength: 200
+        type: string
+    required:
+    - confirmPasswd
+    - currentPasswd
+    - passwd
+    type: object
   request.CreateCalendar:
     properties:
       endDt:
@@ -1206,6 +1222,33 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: To do get a user
+      tags:
+      - User
+  /user/change-password:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: json req body
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/request.ChangePassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: To do change password user
       tags:
       - User
 securityDefinitions:

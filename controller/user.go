@@ -210,3 +210,66 @@ func (h User) RefreshToken(c echo.Context) error {
 		"token": token,
 	}).SendJSON(c)
 }
+
+// ChangePassword godoc
+// @Tags User
+// @Summary To do change password user
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param req body request.ChangePassword true "json req body"
+// @Success      200  {object}	response.Response
+// @Failure      500  {object}  response.Response
+// @Router /user/change-password [post]
+func (h User) ChangePassword(c echo.Context) error {
+	var err error
+	var user model.User
+
+	loginUser, err := getUserLoginInfo(c)
+	if err != nil {
+		errorInternal(c, err)
+	}
+
+	req := new(request.ChangePassword)
+	if err = c.Bind(req); err != nil {
+		return err
+	}
+
+	if err = c.Validate(req); err != nil {
+		return response.Error(http.StatusBadRequest, "error validation", response.ValidationError(err)).SendJSON(c)
+	}
+
+	conn, closeConn := db.GetConnection()
+	defer closeConn()
+
+	err = conn.Where("id = ? ", loginUser.UserID).First(user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.Error(http.StatusBadRequest, "data not found", response.Payload{}).SendJSON(c)
+		}
+		errorInternal(c, err)
+	}
+
+	err = cryption.CheckAES64(req.CurrentPasswd, user.Passwd)
+	if err != nil {
+		return response.Error(http.StatusBadRequest, "invalid username or password", response.Payload{}).SendJSON(c)
+	}
+
+	newPassword, err := cryption.EncryptAES64(req.Passwd)
+	if err != nil {
+		panic(err)
+	}
+
+	tx := conn.Begin()
+
+	user.Passwd = newPassword
+	user.PassVersion = user.PassVersion + 1
+
+	tx.Save(&user)
+
+	err = tx.Commit().Error
+	if err != nil {
+		errorInternal(c, err)
+	}
+	return response.Success(http.StatusAccepted, "success", response.Payload{}).SendJSON(c)
+}

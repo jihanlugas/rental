@@ -37,6 +37,7 @@ func Init() *echo.Echo {
 
 	user := router.Group("/user")
 	user.GET("/:id", userController.GetById)
+	user.POST("/change-password", userController.ChangePassword, checkToken)
 
 	company := router.Group("/company")
 	company.GET("/:id", companyController.GetById)

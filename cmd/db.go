@@ -323,7 +323,7 @@ func seed() {
 	tx.Create(&users)
 
 	companies := []model.Company{
-		{UserID: users[0].ID, Name: "Company 1", CreateBy: users[0].ID, CreateDt: now, UpdateBy: users[0].ID, UpdateDt: now},
+		{UserID: users[0].ID, Name: "My Corp", CreateBy: users[0].ID, CreateDt: now, UpdateBy: users[0].ID, UpdateDt: now},
 	}
 	tx.Create(&companies)
 
